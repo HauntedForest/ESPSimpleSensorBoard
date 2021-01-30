@@ -1,0 +1,36 @@
+{
+  "network": {
+    "useWifi": true,
+    "ssid": "golde",
+    "passphrase": "ostrich!",
+    "hostname": "",
+    "ip": [
+      192,
+      168,
+      1,
+      10
+    ],
+    "netmask": [
+      255,
+      255,
+      255,
+      0
+    ],
+    "gateway": [
+      192,
+      168,
+      1,
+      1
+    ],
+    "dhcp": true,
+    "ap_fallback": true
+  },
+
+  "device": {
+    "id": "MyPillow",
+    "millisOn": 2000,
+    "millisOff": 1500
+  }
+
+
+}
