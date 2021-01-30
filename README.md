@@ -1,0 +1,1 @@
+//todo: make a better readme that explains everything
