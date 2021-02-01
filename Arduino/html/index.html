@@ -203,15 +203,29 @@
 								<label class="custom-control-label" for="customCheck1">Beam Sensor</label>
 							</div>
 							<div class="custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="checkInputHTTPRequests" ,
+									checked>
+								<label class="custom-control-label" for="checkInputHTTPRequests">HTTP Requests</label>
+							</div>
+							<div class="custom-control custom-checkbox">
 								<input type="checkbox" class="custom-control-input" id="checkInputTally">
-								<label class="custom-control-label" for="checkInputTally">TallyArbiter</label>
+								<label class="custom-control-label" for="checkInputTally">Tally Arbiter</label>
 							</div>
 						</div>
 					</div>
 				</fieldset>
 
 				<fieldset id="deviceConfigFieldsetTally" style="display:none;">
-					<legend class="esps-legend">TallyArbiter</legend>
+					<legend class="esps-legend">Tally Arbiter</legend>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="customRadio1" name="customRadio" class="custom-control-input" checked>
+						<label class="custom-control-label" for="customRadio1">When live, disable sensor</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
+						<label class="custom-control-label" for="customRadio2">When live, sensor still is active in
+							tandom with HTTP requests</label>
+					</div>
 				</fieldset>
 
 				<fieldset>

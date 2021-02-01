@@ -88,10 +88,11 @@ $(function() {
 	hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
 	//device setup
-	$('.custom-control-input').on('change', (evt) => {
+	$('#checkInputTally').on('change', (evt) => {
 		var checked = $(evt.target).prop('checked');
 		if (checked) {
 			$('#deviceConfigFieldsetTally').show();
+			$('#checkInputHTTPRequests').prop('checked', true);
 		} else {
 			$('#deviceConfigFieldsetTally').hide();
 		}
