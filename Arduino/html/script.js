@@ -312,13 +312,29 @@ function wsReadyToSend() {
 
 function getConfig(data) {
 	var config = JSON.parse(data);
-
-	// Device and Network config
+	console.log(config);
+	// devices
 	$('#title').text('ESP - ' + config.device.id);
 	$('#name').text(config.device.id);
 	$('#devid').val(config.device.id);
-	$('#millisOn').val(config.device.millisOn);
-	$('#millisOff').val(config.device.millisOff);
+
+	$('#checkInputMotion').prop('checked', config.device.inputs.motion);
+	$('#checkInputBeam').prop('checked', config.device.inputs.beam);
+	$('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
+	$('#checkInputTally').prop('checked', config.device.inputs.tally);
+
+	$('#radioInputTallyDisableSensor').prop('checked', config.device.tally.disableSensor);
+	$('#radioInputTallyTandomSensor').prop('checked', config.device.tally.tandomSensor);
+
+	$('#inputStartupMS').val(config.device.timings.startupMS);
+	$('#inputTimeOnMS').val(config.device.timings.timeOnMS);
+	$('#inputCooldownMS').val(config.device.timings.cooldownMS);
+
+	if (config.device.inputs.tally) {
+		$('#deviceConfigFieldsetTally').show();
+	}
+
+	//network
 	$('#useWifi').prop('checked', config.network.useWifi);
 	if (config.network.useWifi) {
 		$('.useWifi').removeClass('hidden');
@@ -430,13 +446,33 @@ function submitWiFi() {
 function submitConfig() {
 	var json = {
 		device: {
-			id: $('#devid').val(),
-			millisOn: parseInt($('#millisOn').val()),
-			millisOff: parseInt($('#millisOff').val())
+			inputs: {
+				motion: parseBoolean($('#checkInputMotion').val()),
+				beam: parseBoolean($('#checkInputBeam').val()),
+				http: parseBoolean($('#checkInputHTTPRequests').val()),
+				tally: parseBoolean($('#checkInputTally').val())
+			},
+
+			tally: {
+				disableSensor: parseBoolean($('#radioInputTallyDisableSensor').val()),
+				tandomSensor: parseBoolean($('#radioInputTallyTandomSensor').val())
+			},
+
+			timings: {
+				startupMS: parseInt($('#inputStartupMS').val()),
+				timeOnMS: parseInt($('#inputTimeOnMS').val()),
+				cooldownMS: parseInt($('#inputCooldownMS').val())
+			},
+
+			id: $('#devid').val()
 		}
 	};
 
 	wsEnqueue('S2' + JSON.stringify(json));
+}
+
+function parseBoolean(val) {
+	return val == 'true';
 }
 
 function showReboot() {

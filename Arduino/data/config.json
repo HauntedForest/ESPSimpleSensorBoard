@@ -1,36 +1,32 @@
 {
-  "network": {
-    "useWifi": true,
-    "ssid": "golde",
-    "passphrase": "ostrich!",
-    "hostname": "",
-    "ip": [
-      192,
-      168,
-      1,
-      10
-    ],
-    "netmask": [
-      255,
-      255,
-      255,
-      0
-    ],
-    "gateway": [
-      192,
-      168,
-      1,
-      1
-    ],
-    "dhcp": true,
-    "ap_fallback": true
-  },
+	"network": {
+		"useWifi": true,
+		"ssid": "golde",
+		"passphrase": "ostrich!",
+		"hostname": "",
+		"ip": [ 192, 168, 1, 10 ],
+		"netmask": [ 255, 255, 255, 0 ],
+		"gateway": [ 192, 168, 1, 1 ],
+		"dhcp": true,
+		"ap_fallback": true
+	},
 
-  "device": {
-    "id": "MyPillow",
-    "millisOn": 2000,
-    "millisOff": 1500
-  }
-
-
+	"device": {
+		"id": "MrNoName",
+		"inputs": {
+			"motion": false,
+			"beam": false,
+			"http": true,
+			"tally": false
+		},
+		"tally": {
+			"disableSensor": true,
+			"tandomSensor": false
+		},
+		"timings": {
+			"startupMS": 0,
+			"timeOnMS": 100,
+			"cooldownMS": 0
+		}
+	}
 }

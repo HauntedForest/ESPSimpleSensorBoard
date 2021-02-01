@@ -6,10 +6,10 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title id="title"></title>
-	<!-- for local development -->
+	<!-- for local development 
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
-
+-->
 	<link rel="stylesheet" type="text/css" href="esps.css">
 </head>
 
@@ -195,16 +195,15 @@
 					<div class="form-group">
 						<div class="col-sm-10">
 							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="customCheck1">
-								<label class="custom-control-label" for="customCheck1">Motion Sensor</label>
+								<input type="checkbox" class="custom-control-input" id="checkInputMotion">
+								<label class="custom-control-label" for="checkInputMotion">Motion Sensor</label>
 							</div>
 							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="customCheck1">
-								<label class="custom-control-label" for="customCheck1">Beam Sensor</label>
+								<input type="checkbox" class="custom-control-input" id="checkInputBeam">
+								<label class="custom-control-label" for="checkInputBeam">Beam Sensor</label>
 							</div>
 							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputHTTPRequests" ,
-									checked>
+								<input type="checkbox" class="custom-control-input" id="checkInputHTTPRequests">
 								<label class="custom-control-label" for="checkInputHTTPRequests">HTTP Requests</label>
 							</div>
 							<div class="custom-control custom-checkbox">
@@ -218,35 +217,35 @@
 				<fieldset id="deviceConfigFieldsetTally" style="display:none;">
 					<legend class="esps-legend">Tally Arbiter</legend>
 					<div class="custom-control custom-radio">
-						<input type="radio" id="customRadio1" name="customRadio" class="custom-control-input" checked>
-						<label class="custom-control-label" for="customRadio1">When live, disable sensor</label>
+						<input type="radio" id="radioInputTallyDisableSensor" name="customRadio"
+							class="custom-control-input">
+						<label class="custom-control-label" for="radioInputTallyDisableSensor">When live, disable
+							sensor</label>
 					</div>
 					<div class="custom-control custom-radio">
-						<input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
-						<label class="custom-control-label" for="customRadio2">When live, sensor still is active in
-							tandom with HTTP requests</label>
+						<input type="radio" id="radioInputTallyTandomSensor" name="customRadio"
+							class="custom-control-input">
+						<label class="custom-control-label" for="radioInputTallyTandomSensor">When live, sensor still is
+							active in tandom with HTTP requests</label>
 					</div>
 				</fieldset>
 
 				<fieldset>
 					<legend class="esps-legend">Timings</legend>
 					<div class="form-group">
-						<label class="control-label col-sm-2" for="devid">Startup (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="millisOff" name="millisOff"
-								title="Milliseconds the LED is off during blinking."
+						<label class="control-label col-sm-2" for="inputStartupMS">Startup (ms)</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="inputStartupMS"
 								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-sm-2" for="devid">Time on (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="millisOn" name="millisOn"
-								title="Milliseconds the LED is on during blinking."
+						<label class="control-label col-sm-2" for="inputTimeOnMS">Time on (ms)</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="inputTimeOnMS"
 								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-sm-2" for="devid">Cooldown (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="millisOff" name="millisOff"
-								title="Milliseconds the LED is off during blinking."
+						<label class="control-label col-sm-2" for="inputCooldownMS">Cooldown (ms)</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="inputCooldownMS"
 								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
 					</div>
 				</fieldset>
@@ -377,16 +376,16 @@
 		</div>
 	</footer>
 
-	<!-- for local development -->
+	<!-- for local development 
 	<script type="text/javascript" src="js/jquery-3.1.1.js"></script>
 	<script type="text/javascript" src="js/bootstrap.js"></script>
 	<script type="text/javascript" src="js/jqColorPicker.js"></script>
 	<script type="text/javascript" src="script.js"></script>
-
+-->
 	<script type="text/javascript" src="esps.js"></script>
 
 	<script>
-		wsConne();
+		wsConnect();
 	</script>
 </body>
 
