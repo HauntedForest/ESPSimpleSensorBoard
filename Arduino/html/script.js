@@ -447,15 +447,15 @@ function submitConfig() {
 	var json = {
 		device: {
 			inputs: {
-				motion: parseBoolean($('#checkInputMotion').val()),
-				beam: parseBoolean($('#checkInputBeam').val()),
-				http: parseBoolean($('#checkInputHTTPRequests').val()),
-				tally: parseBoolean($('#checkInputTally').val())
+				motion: $('#checkInputMotion').prop('checked'),
+				beam: $('#checkInputBeam').prop('checked'),
+				http: $('#checkInputHTTPRequests').prop('checked'),
+				tally: $('#checkInputTally').prop('checked')
 			},
 
 			tally: {
-				disableSensor: parseBoolean($('#radioInputTallyDisableSensor').val()),
-				tandomSensor: parseBoolean($('#radioInputTallyTandomSensor').val())
+				disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
+				tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
 			},
 
 			timings: {
@@ -469,10 +469,6 @@ function submitConfig() {
 	};
 
 	wsEnqueue('S2' + JSON.stringify(json));
-}
-
-function parseBoolean(val) {
-	return val == 'true';
 }
 
 function showReboot() {
