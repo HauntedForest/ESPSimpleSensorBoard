@@ -312,7 +312,6 @@ function wsReadyToSend() {
 
 function getConfig(data) {
 	var config = JSON.parse(data);
-	console.log(config);
 	// devices
 	$('#title').text('ESP - ' + config.device.id);
 	$('#name').text(config.device.id);
