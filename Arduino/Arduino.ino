@@ -15,9 +15,16 @@ const int forceAccessPointPin = D5;   // Connect to ground to force access point
 
 // State.
 String deviceName = "Default";
-int    millisOn = 2000;
-int    millisOff = 2000;
-bool   blinking = true;
+
+bool deviceInputsMotion = false;
+bool deviceInputsBeam = false;
+bool deviceInputsHTTP = true;
+bool deviceInputsTally = false;
+bool deviceTallyDisableSensor = false;
+bool deviceTallyTandomSensor = false;
+int deviceTimingsStartupMS = 0;
+int deviceTimingsTimeOnMS = 100;
+int deviceTimingsCooldownMS = 0;
 
 // Was AP request at start.
 bool   startupRequestAP = false;
@@ -25,21 +32,13 @@ bool   startupRequestAP = false;
 void led_on_request(AsyncWebServerRequest * request)
 {
   digitalWrite(RELAY_PIN, LOW);
-  blinking = false;
   request->send(200, "text/plain", "Relay is ON!");
 }
 
 void led_off_request(AsyncWebServerRequest * request)
 {
   digitalWrite(RELAY_PIN, HIGH);
-  blinking = false;
   request->send(200, "text/plain", "Relay is OFF!");
-}
-
-void led_blink_request(AsyncWebServerRequest * request)
-{
-  blinking = true;
-  request->send(200, "text/plain", "Relay is blinking!");
 }
 
 void setup() {
@@ -73,7 +72,6 @@ void setup() {
   if (webServer) {
     webServer->on("/on", HTTP_GET, led_on_request);
     webServer->on("/off", HTTP_GET, led_off_request);
-    webServer->on("/blink", HTTP_GET, led_blink_request);
   }
 }
 
@@ -128,30 +126,45 @@ void saveState(const JsonObject & json)
 {
   JsonObject device = json.createNestedObject("device");
   device["id"] = deviceName.c_str();
-  device["millisOn"] = millisOn;
-  device["millisOff"] = millisOff;
+  device["inputs"]["motion"] = deviceInputsMotion;
+  device["inputs"]["beam"] = deviceInputsBeam;
+  device["inputs"]["http"] = deviceInputsHTTP;
+  device["inputs"]["tally"] = deviceInputsTally;
+  device["tally"]["disableSensor"] = deviceTallyDisableSensor;
+  device["tally"]["tandomSensor"] = deviceTallyTandomSensor;
+  device["timings"]["startupMS"] = deviceTimingsStartupMS;
+  device["timings"]["timeOnMS"] = deviceTimingsTimeOnMS;
+  device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
 }
 
 void loadState(const JsonObject & json)
 {
   if (json.containsKey("device")) {
     deviceName = json["device"]["id"].as<String>();
-    millisOn = json["device"]["millisOn"].as<int>();
-    millisOff = json["device"]["millisOff"].as<int>();
+    if(json["device"].containsKey("inputs")) {
+      deviceInputsMotion = json["device"]["inputs"]["motion"].as<bool>();
+      deviceInputsBeam = json["device"]["inputs"]["beam"].as<bool>();
+      deviceInputsHTTP = json["device"]["inputs"]["http"].as<bool>();
+      deviceInputsTally = json["device"]["inputs"]["tally"].as<bool>();
+    }
+
+    if(json["device"].containsKey("tally")) {
+      deviceTallyDisableSensor = json["device"]["tally"]["disableSensor"].as<bool>();
+      deviceTallyTandomSensor = json["device"]["tally"]["tandomSensor"].as<bool>();
+    }
+
+    if(json["device"].containsKey("timings")) {
+      deviceTimingsStartupMS = json["device"]["timings"]["startupMS"].as<int>();
+      deviceTimingsTimeOnMS = json["device"]["timings"]["timeOnMS"].as<int>();
+      deviceTimingsCooldownMS = json["device"]["timings"]["cooldownMS"].as<int>();
+    }
+    
   }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   framework_loop();
-
-  if (digitalRead(BEAM_TRIGGER_PIN) == LOW) {
-    digitalWrite(RELAY_PIN, HIGH);
-    delay(millisOn);
-    digitalWrite(RELAY_PIN, LOW);
-    delay(millisOff);
-  }
-  
   
   // If the AP switch is closed, but wasn't closed at startup, restart to
   // enter AP mode.
