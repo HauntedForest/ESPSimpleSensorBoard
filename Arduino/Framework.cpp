@@ -227,8 +227,9 @@ AsyncWebServer * framework_setup(bool forceAccessPoint) {
       }
     }
 
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
-
+    if (connectionStatus.status == CONNSTAT_CONNECTED) {
+        wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
+    }
     LOG_PORT.print("IP : ");
     LOG_PORT.println(connectionStatus.ourLocalIP);
     LOG_PORT.print("Subnet mask : ");
@@ -330,7 +331,7 @@ void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
   connectionStatus.status = CONNSTAT_NONE;
   updateDisplay = true;
 
-  wifiTicker.once(2, connectWifi);
+  wifiTicker.once_scheduled(2, connectWifi);
 }
 
 
