@@ -84,7 +84,7 @@ void requestTrigger(AsyncWebServerRequest * request) {
 		return;
 	}
 
-	if(deviceInputsTally && currentState != TALLY_LIVE) {
+	if(deviceInputsTally && currentTallyState != TALLY_LIVE) {
 		request -> send(405, "text/plain", "Tally is not live (change)");
 		return;
 	}
