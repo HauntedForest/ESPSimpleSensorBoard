@@ -346,6 +346,7 @@ function getConfig(data) {
 	$('#inputStartupMS').val(config.device.timings.startupMS);
 	$('#inputTimeOnMS').val(config.device.timings.timeOnMS);
 	$('#inputCooldownMS').val(config.device.timings.cooldownMS);
+	$('#inputLoopCount').val(config.device.timings.loopCount);
 
 	if (config.device.inputs.tally) {
 		$('#deviceConfigFieldsetTally').show();
@@ -479,7 +480,8 @@ function submitConfig() {
 			timings: {
 				startupMS: parseInt($('#inputStartupMS').val()),
 				timeOnMS: parseInt($('#inputTimeOnMS').val()),
-				cooldownMS: parseInt($('#inputCooldownMS').val())
+				cooldownMS: parseInt($('#inputCooldownMS').val()),
+				loopCount: parseInt($('#inputLoopCount').val())
 			},
 
 			id: $('#devid').val()

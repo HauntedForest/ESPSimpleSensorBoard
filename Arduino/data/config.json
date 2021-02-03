@@ -26,7 +26,8 @@
 		"timings": {
 			"startupMS": 0,
 			"timeOnMS": 100,
-			"cooldownMS": 0
+			"cooldownMS": 0,
+			"loopCount": 1
 		}
 	}
 }

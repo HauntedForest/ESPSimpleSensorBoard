@@ -27,6 +27,7 @@ bool deviceTallyTandomSensor = false;
 int deviceTimingsStartupMS = 0;
 int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
+int deviceTimingsLoopCount = 1;
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -209,7 +210,7 @@ void updateStatus(const connection_status_t & connectionStatus) {
 	display.println(statusText);
 
 	if (connectionStatus.status != CONNSTAT_NONE) {
-		display.print("SSID: ");
+		//display.print("SSID: ");
 		display.println(connectionStatus.ssid);
 	}
 
@@ -225,8 +226,8 @@ void updateStatus(const connection_status_t & connectionStatus) {
 	
 
 	if (connectionStatus.status == CONNSTAT_CONNECTED) {
-		display.setCursor(114, 8);
-		display.println(connectionStatus.signalStrength);
+		display.setCursor(114, 0);
+		display.println(connectionStatus.signalStrength - 1); //99 cap to not waste a character
 	}
 
 	display.display();
@@ -244,6 +245,7 @@ void saveState(const JsonObject & json) {
 	device["timings"]["startupMS"] = deviceTimingsStartupMS;
 	device["timings"]["timeOnMS"] = deviceTimingsTimeOnMS;
 	device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
+	device["timings"]["loopCount"] = deviceTimingsLoopCount;
 }
 
 void loadState(const JsonObject & json) {
@@ -265,6 +267,7 @@ void loadState(const JsonObject & json) {
 			deviceTimingsStartupMS = json["device"]["timings"]["startupMS"].as < int > ();
 			deviceTimingsTimeOnMS = json["device"]["timings"]["timeOnMS"].as < int > ();
 			deviceTimingsCooldownMS = json["device"]["timings"]["cooldownMS"].as < int > ();
+			deviceTimingsLoopCount = json["device"]["timings"]["loopCount"].as < int > ();
 		}
 
 	}
@@ -288,9 +291,12 @@ void checkForTrigger() {
 	if (activate) {
 		activate = false;
 		delay(deviceTimingsStartupMS);
-		digitalWrite(RELAY_PIN, HIGH);
-		delay(deviceTimingsTimeOnMS);
-		digitalWrite(RELAY_PIN, LOW);
+		for(int i = 0; i < deviceTimingsLoopCount; i++) {
+			digitalWrite(RELAY_PIN, HIGH);
+			delay(deviceTimingsTimeOnMS);
+			digitalWrite(RELAY_PIN, LOW);
+			delay(deviceTimingsTimeOnMS);
+		}
 		delay(deviceTimingsCooldownMS);
 	}
 }
