@@ -150,6 +150,9 @@ void setup() {
 	Wire.setClock(400000L); // set I2C clock to 400kHz
 	display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 128x32)
 
+	//disable screen wrapping
+	display.setTextWrap(false);
+
 	// Show initial message on the screen
 	display.clearDisplay();
 	display.setTextSize(2); // Big Text
@@ -205,10 +208,10 @@ void updateStatus(const connection_status_t & connectionStatus) {
 	display.print(" ");
 	display.println(statusText);
 
-	// if (connectionStatus.status != CONNSTAT_NONE) {
-	// 	display.print("SSID: ");
-	// 	display.println(connectionStatus.ssid);
-	// }
+	if (connectionStatus.status != CONNSTAT_NONE) {
+		display.print("SSID: ");
+		display.println(connectionStatus.ssid);
+	}
 
 	if (connectionStatus.status == CONNSTAT_CONNECTED || connectionStatus.status == CONNSTAT_LOCALAP) {
 		display.print("IP: ");
