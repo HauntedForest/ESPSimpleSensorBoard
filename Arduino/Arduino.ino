@@ -28,10 +28,13 @@ int deviceTimingsStartupMS = 0;
 int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
 
-const String TALLY_LIVE = "live";
+const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
 const String TALLY_NONE = "none";
 String currentTallyState = TALLY_NONE;
+
+bool temp_tally_program = false;
+bool temp_tally_preview = false;
 
 // Was AP request at start.
 bool startupRequestAP = false;
@@ -49,31 +52,72 @@ void led_off_request(AsyncWebServerRequest * request) {
 }
 
 void requestTally(AsyncWebServerRequest * request) {
+	Serial.println("TALLY -> HIT!");
 	if(!deviceInputsTally){
 		request -> send(405, "text/plain", "Tally not Enabled");
+		Serial.println("TALLY -> Not enabled");
 		return;
 	}
 
-	if(!request->hasParam("state")){
+	if(!request->hasParam("bus")){
 		request -> send(400, "text/plain", "Missing 'state' paramater");
+		Serial.println("TALLY -> Missing state");
 		return;
 	}
 
-  	AsyncWebParameter* p = request->getParam("state");
-	if(p -> value() == TALLY_LIVE) {
-		currentTallyState = TALLY_LIVE;
+	if(!request->hasParam("on")){
+		request -> send(400, "text/plain", "Missing 'on' paramater");
+		Serial.println("TALLY -> Missing state");
+		return;
 	}
-	else if(p -> value() == TALLY_PREVIEW) {
-		currentTallyState = TALLY_PREVIEW;
+
+  	AsyncWebParameter* bus = request->getParam("bus");
+	AsyncWebParameter* onStr = request->getParam("on");
+	bool on = false;
+
+	if(onStr -> value() == "true") {
+		on = true;
 	}
-	else if(p -> value() == TALLY_NONE) {
-		currentTallyState = TALLY_NONE;
+	else if(onStr -> value() == "false") {
+		on = false;
 	}
 	else {
-		request -> send(400, "text/plain", "Error: 'state' paramater must be '" + TALLY_LIVE + "', '" + TALLY_PREVIEW + "' or '" + TALLY_NONE + "'.");
+		request -> send(400, "text/plain", "Error: 'on' paramater must be 'true' or 'false'.");
+	}
+
+	if(bus -> value() == TALLY_PROGRAM) {
+		temp_tally_program = on;
+	}
+	else if(bus -> value() == TALLY_PREVIEW) {
+		temp_tally_preview = on;
+	}
+	else {
+		request -> send(400, "text/plain", "Error: 'state' paramater must be '" + TALLY_PREVIEW + "', '" + TALLY_PROGRAM + "'.");
+		Serial.println("TALLY -> Error: 'state' paramater must be");
 		return;
 	}
 
+	//preview
+	if(!temp_tally_program && temp_tally_preview) {
+		currentTallyState = TALLY_PREVIEW;
+	}
+	//program
+	else if(temp_tally_program && !temp_tally_preview) {
+		currentTallyState = TALLY_PROGRAM;
+	}
+	//preview & program = program
+	else if(temp_tally_preview && temp_tally_program) {
+		currentTallyState = TALLY_PROGRAM;
+	}
+	//Not in a state
+	else if(!temp_tally_preview && !temp_tally_program) {
+		currentTallyState = TALLY_NONE;
+	}
+
+	Serial.print("TALLY -> ");
+	Serial.println(currentTallyState);
+	
+	Serial.println("TALLY -> Success");
 	request -> send(200, "text/plain", "Success");
 }
 
@@ -84,7 +128,7 @@ void requestTrigger(AsyncWebServerRequest * request) {
 		return;
 	}
 
-	if(deviceInputsTally && currentTallyState != TALLY_LIVE) {
+	if(deviceInputsTally && currentTallyState != TALLY_PROGRAM) {
 		request -> send(405, "text/plain", "Tally is not live (change)");
 		return;
 	}
@@ -161,10 +205,10 @@ void updateStatus(const connection_status_t & connectionStatus) {
 	display.print(" ");
 	display.println(statusText);
 
-	if (connectionStatus.status != CONNSTAT_NONE) {
-		display.print("SSID: ");
-		display.println(connectionStatus.ssid);
-	}
+	// if (connectionStatus.status != CONNSTAT_NONE) {
+	// 	display.print("SSID: ");
+	// 	display.println(connectionStatus.ssid);
+	// }
 
 	if (connectionStatus.status == CONNSTAT_CONNECTED || connectionStatus.status == CONNSTAT_LOCALAP) {
 		display.print("IP: ");
@@ -226,7 +270,7 @@ void loadState(const JsonObject & json) {
 void checkForTrigger() {
 	
 	//if tally is disabled, or its enabled in tandom mode
-	if(!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_LIVE)) {
+	if(!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_PROGRAM)) {
 		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW) {
 			activate = true;
 		}
