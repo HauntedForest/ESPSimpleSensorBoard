@@ -40,7 +40,7 @@ gulp.task('html', function() {
 /* CSS Task */
 gulp.task('css', function() {
 	return gulp
-		.src([ 'html/css/bootstrap.css', 'html/style.css' ])
+		.src([ 'html/css/bootstrap.css', 'html/css/toastr.min.css', 'html/style.css' ])
 		.pipe(plumber())
 		.pipe(concat('esps.css'))
 		.pipe(cleancss())
@@ -51,7 +51,13 @@ gulp.task('css', function() {
 /* JavaScript Task */
 gulp.task('js', function() {
 	return gulp
-		.src([ 'html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js' ])
+		.src([
+			'html/js/jquery*.js',
+			'html/js/bootstrap.js',
+			'html/js/jqColorPicker.js',
+			'html/js/toastr.min.js',
+			'html/script.js'
+		])
 		.pipe(plumber())
 		.pipe(concat('esps.js'))
 		.pipe(terser())

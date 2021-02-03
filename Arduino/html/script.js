@@ -7,6 +7,24 @@ var wsTimerId;
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
 $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 
+toastr.options = {
+	closeButton: true,
+	debug: false,
+	newestOnTop: false,
+	progressBar: true,
+	positionClass: 'toast-top-right',
+	preventDuplicates: false,
+	onclick: null,
+	showDuration: '300',
+	hideDuration: '1000',
+	timeOut: '5000',
+	extendedTimeOut: '1000',
+	showEasing: 'swing',
+	hideEasing: 'linear',
+	showMethod: 'fadeIn',
+	hideMethod: 'fadeOut'
+};
+
 // jQuery doc ready
 $(function() {
 	// Menu navigation for single page layout
@@ -440,6 +458,7 @@ function submitWiFi() {
 		}
 	};
 	wsEnqueue('S1' + JSON.stringify(json));
+	toastr.success('Config saved!');
 }
 
 function submitConfig() {
@@ -468,6 +487,7 @@ function submitConfig() {
 	};
 
 	wsEnqueue('S2' + JSON.stringify(json));
+	toastr.success('Config saved!');
 }
 
 function showReboot() {
