@@ -171,6 +171,12 @@ void updateStatus(const connection_status_t & connectionStatus) {
 		display.println(connectionStatus.ourLocalIP);
 	}
 
+	if(deviceInputsTally) {
+		display.print("Tally: ");
+		display.println(currentTallyState);
+	}
+	
+
 	if (connectionStatus.status == CONNSTAT_CONNECTED) {
 		display.setCursor(114, 8);
 		display.println(connectionStatus.signalStrength);
