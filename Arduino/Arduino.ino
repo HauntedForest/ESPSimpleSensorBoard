@@ -28,8 +28,15 @@ int deviceTimingsStartupMS = 0;
 int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
 
+const String TALLY_LIVE = "live";
+const String TALLY_PREVIEW = "preview";
+const String TALLY_NONE = "none";
+String currentTallyState = TALLY_NONE;
+
 // Was AP request at start.
 bool startupRequestAP = false;
+
+bool activate = false;
 
 void led_on_request(AsyncWebServerRequest * request) {
 	digitalWrite(RELAY_PIN, LOW);
@@ -39,6 +46,51 @@ void led_on_request(AsyncWebServerRequest * request) {
 void led_off_request(AsyncWebServerRequest * request) {
 	digitalWrite(RELAY_PIN, HIGH);
 	request -> send(200, "text/plain", "Relay is OFF!");
+}
+
+void requestTally(AsyncWebServerRequest * request) {
+	if(!deviceInputsTally){
+		request -> send(405, "text/plain", "Tally not Enabled");
+		return;
+	}
+
+	if(!request->hasParam("state")){
+		request -> send(400, "text/plain", "Missing 'state' paramater");
+		return;
+	}
+
+  	AsyncWebParameter* p = request->getParam("state");
+	if(p -> value() == TALLY_LIVE) {
+		currentTallyState = TALLY_LIVE;
+	}
+	else if(p -> value() == TALLY_PREVIEW) {
+		currentTallyState = TALLY_PREVIEW;
+	}
+	else if(p -> value() == TALLY_NONE) {
+		currentTallyState = TALLY_NONE;
+	}
+	else {
+		request -> send(400, "text/plain", "Error: 'state' paramater must be '" + TALLY_LIVE + "', '" + TALLY_PREVIEW + "' or '" + TALLY_NONE + "'.");
+		return;
+	}
+
+	request -> send(200, "text/plain", "Success");
+}
+
+void requestTrigger(AsyncWebServerRequest * request) {
+	
+	if(!deviceInputsHTTP) {
+		request -> send(405, "text/plain", "HTTP requests not enabled");
+		return;
+	}
+
+	if(deviceInputsTally && currentState != TALLY_LIVE) {
+		request -> send(405, "text/plain", "Tally is not live (change)");
+		return;
+	}
+	
+	activate = true;
+	request -> send(200, "text/plain", "Success");
 }
 
 void setup() {
@@ -51,7 +103,7 @@ void setup() {
 
 	// Initialise OLED display.
 	Wire.begin(4, 0); // set I2C pins [SDA = GPIO4 (D2), SCL = GPIO0 (D3)], default clock is 100kHz
-	Wire.setClock(400000 L); // set I2C clock to 400kHz
+	Wire.setClock(400000L); // set I2C clock to 400kHz
 	display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 128x32)
 
 	// Show initial message on the screen
@@ -72,6 +124,8 @@ void setup() {
 	if (webServer) {
 		webServer -> on("/on", HTTP_GET, led_on_request);
 		webServer -> on("/off", HTTP_GET, led_off_request);
+		webServer -> on("/tally", HTTP_POST, requestTally);
+		webServer -> on("/trigger", HTTP_POST, requestTrigger);
 	}
 }
 
@@ -163,9 +217,36 @@ void loadState(const JsonObject & json) {
 	}
 }
 
+void checkForTrigger() {
+	
+	//if tally is disabled, or its enabled in tandom mode
+	if(!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_LIVE)) {
+		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW) {
+			activate = true;
+		}
+
+		if(deviceInputsMotion && digitalRead(PIR_TRIGGER_PIN) == LOW) {
+			activate = true;
+		}
+	}
+
+	
+
+	if (activate) {
+		activate = false;
+		delay(deviceTimingsStartupMS);
+		digitalWrite(RELAY_PIN, HIGH);
+		delay(deviceTimingsTimeOnMS);
+		digitalWrite(RELAY_PIN, LOW);
+		delay(deviceTimingsCooldownMS);
+	}
+}
+
 void loop() {
 	// put your main code here, to run repeatedly:
 	framework_loop();
+
+	checkForTrigger();
 
 	// If the AP switch is closed, but wasn't closed at startup, restart to
 	// enter AP mode.
