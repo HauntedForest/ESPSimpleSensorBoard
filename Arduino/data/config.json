@@ -1,9 +1,9 @@
 {
 	"network": {
 		"useWifi": true,
-		"ssid": "golde",
-		"passphrase": "ostrich!",
-		"hostname": "",
+		"ssid": "Haunted_Forest_IoT",
+		"passphrase": "Husky3087",
+		"hostname": "ESP",
 		"ip": [ 192, 168, 1, 10 ],
 		"netmask": [ 255, 255, 255, 0 ],
 		"gateway": [ 192, 168, 1, 1 ],
