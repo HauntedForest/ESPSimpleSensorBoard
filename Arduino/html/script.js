@@ -335,7 +335,8 @@ function getConfig(data) {
 	$('#name').text(config.device.id);
 	$('#devid').val(config.device.id);
 
-	$('#checkInputMotion').prop('checked', config.device.inputs.motion);
+	$('#checkInputMotionWhite').prop('checked', config.device.inputs.motionWhite);
+	$('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
 	$('#checkInputBeam').prop('checked', config.device.inputs.beam);
 	$('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
 	$('#checkInputTally').prop('checked', config.device.inputs.tally);
@@ -466,7 +467,8 @@ function submitConfig() {
 	var json = {
 		device: {
 			inputs: {
-				motion: $('#checkInputMotion').prop('checked'),
+				motionWhite: $('#checkInputMotionWhite').prop('checked'),
+				motionBlack: $('#checkInputMotionBlack').prop('checked'),
 				beam: $('#checkInputBeam').prop('checked'),
 				http: $('#checkInputHTTPRequests').prop('checked'),
 				tally: $('#checkInputTally').prop('checked')

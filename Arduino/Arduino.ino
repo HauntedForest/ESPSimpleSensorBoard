@@ -13,12 +13,17 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, & Wire, OLED_RESET);
 
 const int forceAccessPointPin = D5; // Connect to ground to force access point.
 #define RELAY_PIN D6
-#define PIR_TRIGGER_PIN D1
+
+//white 4 pin PIR sensor
+#define PIR_WHITE_TRIGGER_PIN D1
 #define BEAM_TRIGGER_PIN D7
+//3 pin PIR with board modification
+#define PIR_BLACK_TRIGGER_PIN D0
 
 String deviceName = "Default";
 
-bool deviceInputsMotion = false;
+bool deviceInputsMotionWhite = false;
+bool deviceInputsMotionBlack = false;
 bool deviceInputsBeam = false;
 bool deviceInputsHTTP = true;
 bool deviceInputsTally = false;
@@ -143,7 +148,8 @@ void setup() {
 	pinMode(RELAY_PIN, OUTPUT);
 	digitalWrite(RELAY_PIN, LOW);
 
-	pinMode(PIR_TRIGGER_PIN, INPUT_PULLUP);
+	pinMode(PIR_WHITE_TRIGGER_PIN, INPUT_PULLUP);
+	pinMode(PIR_BLACK_TRIGGER_PIN, INPUT);
 	pinMode(BEAM_TRIGGER_PIN, INPUT_PULLUP);
 
 	// Initialise OLED display.
@@ -236,7 +242,8 @@ void updateStatus(const connection_status_t & connectionStatus) {
 void saveState(const JsonObject & json) {
 	JsonObject device = json.createNestedObject("device");
 	device["id"] = deviceName.c_str();
-	device["inputs"]["motion"] = deviceInputsMotion;
+	device["inputs"]["motionWhite"] = deviceInputsMotionWhite;
+	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
 	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
 	device["inputs"]["tally"] = deviceInputsTally;
@@ -252,7 +259,8 @@ void loadState(const JsonObject & json) {
 	if (json.containsKey("device")) {
 		deviceName = json["device"]["id"].as < String > ();
 		if (json["device"].containsKey("inputs")) {
-			deviceInputsMotion = json["device"]["inputs"]["motion"].as < bool > ();
+			deviceInputsMotionWhite = json["device"]["inputs"]["motionWhite"].as < bool > ();
+			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as < bool > ();
 			deviceInputsBeam = json["device"]["inputs"]["beam"].as < bool > ();
 			deviceInputsHTTP = json["device"]["inputs"]["http"].as < bool > ();
 			deviceInputsTally = json["device"]["inputs"]["tally"].as < bool > ();
@@ -281,7 +289,11 @@ void checkForTrigger() {
 			activate = true;
 		}
 
-		if(deviceInputsMotion && digitalRead(PIR_TRIGGER_PIN) == LOW) {
+		if(deviceInputsMotionWhite && digitalRead(PIR_WHITE_TRIGGER_PIN) == LOW) {
+			activate = true;
+		}
+
+		if(deviceInputsMotionBlack && digitalRead(PIR_BLACK_TRIGGER_PIN) == HIGH) {
 			activate = true;
 		}
 	}

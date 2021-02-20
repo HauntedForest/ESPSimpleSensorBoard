@@ -14,7 +14,8 @@
 	"device": {
 		"id": "MrNoName",
 		"inputs": {
-			"motion": false,
+			"motionWhite": false,
+			"motionBlack": false,
 			"beam": false,
 			"http": true,
 			"tally": false
