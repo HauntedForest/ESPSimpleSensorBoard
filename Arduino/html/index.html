@@ -10,7 +10,7 @@
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="css/toastr.min.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
-	-->
+-->
 	<link rel="stylesheet" type="text/css" href="esps.css">
 </head>
 
@@ -221,11 +221,36 @@
 					</div>
 				</fieldset>
 
+				<fieldset>
+					<legend class="esps-legend">Outputs</legend>
+
+					<div class="form-group">
+						<div class="col-sm-10">
+							<div class="custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" disabled checked
+									id="checkOutputRelay">
+								<label class="custom-control-label" for="checkOutputRelay">Onboard Relay</label>
+							</div>
+							<div class="custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerOtherBoard">
+								<label class="custom-control-label" for="checkOutputTriggerOtherBoard">Trigger Other
+									Board</label>
+							</div>
+							<label class="control-label col-sm-2" for="inputOutputIPAddressOfOtherBoardToTrigger"
+								id="inputOutputIPAddressOfOtherBoardToTriggerLabel" style="display:none;">IP</label>
+							<div class="col-sm-10"><input type="text" class="form-control"
+									id="inputOutputIPAddressOfOtherBoardToTrigger" inputmode="decimal"
+									style="display:none;">
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
 				<fieldset id="deviceConfigFieldsetTally" style="display:none;">
 					<legend class="esps-legend">Tally Arbiter</legend>
 					<div class="form-group">
 						<div class="custom-control custom-radio">
-							<input type="radio" id="radioInputTallyDisableSensor" name="customRadio"
+							<input type="radio" id="radioInputTallyDisableSensor" checked name="customRadio"
 								class="custom-control-input">
 							<label class="custom-control-label" for="radioInputTallyDisableSensor">When live, disable
 								sensor</label>
@@ -281,7 +306,9 @@
 					<!-- Device Config Save -->
 					<div class="form-group">
 						<div class="col-sm-offset-2 col-sm-10">
-							<button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
+							<button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
+							<button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
+								Config</button>
 						</div>
 					</div>
 
@@ -399,7 +426,7 @@
 	<script type="text/javascript" src="js/jqColorPicker.js"></script>
 	<script type="text/javascript" src="js/toastr.min.js"></script>
 	<script type="text/javascript" src="script.js"></script>
-	-->
+-->
 	<script type="text/javascript" src="esps.js"></script>
 
 	<script>

@@ -1,8 +1,8 @@
 {
 	"network": {
 		"useWifi": true,
-		"ssid": "Haunted_Forest_IoT",
-		"passphrase": "Husky3087",
+		"ssid": "golde",
+		"passphrase": "ostrich!",
 		"hostname": "ESP",
 		"ip": [ 192, 168, 1, 10 ],
 		"netmask": [ 255, 255, 255, 0 ],
@@ -18,11 +18,18 @@
 			"motionBlack": false,
 			"beam": false,
 			"http": true,
-			"tally": false
+			"tally": {
+				"enabled": false,
+				"disableSensor": true,
+				"tandomSensor": false
+			}
 		},
-		"tally": {
-			"disableSensor": true,
-			"tandomSensor": false
+		"outputs": {
+			"relay": true,
+			"triggerOtherBoard": {
+				"enabled": false,
+				"ip": "192.168.1.000"
+			}
 		},
 		"timings": {
 			"startupMS": 0,

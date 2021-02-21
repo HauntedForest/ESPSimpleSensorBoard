@@ -115,6 +115,32 @@ $(function() {
 			$('#deviceConfigFieldsetTally').hide();
 		}
 	});
+
+	$('#checkInputMotionWhite').on('change', (evt) => {
+		var checked = $('#checkInputMotionBlack').prop('checked');
+		if (checked) {
+			$('#checkInputMotionBlack').prop('checked', false);
+		}
+	});
+
+	$('#checkInputMotionBlack').on('change', (evt) => {
+		var checked = $('#checkInputMotionWhite').prop('checked');
+		if (checked) {
+			$('#checkInputMotionWhite').prop('checked', false);
+		}
+	});
+
+	$('#checkOutputTriggerOtherBoard').on('change', (evt) => {
+		var checked = $(evt.target).prop('checked');
+		console.log(checked);
+		if (checked) {
+			$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
+			$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
+		} else {
+			$('#inputOutputIPAddressOfOtherBoardToTrigger').hide();
+			$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').hide();
+		}
+	});
 });
 
 function wifiValidation() {
@@ -271,9 +297,7 @@ function wsConnect() {
 			wsConnect();
 		};
 	} else {
-		alert(
-			'WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.'
-		);
+		alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser.');
 	}
 }
 
@@ -339,18 +363,27 @@ function getConfig(data) {
 	$('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
 	$('#checkInputBeam').prop('checked', config.device.inputs.beam);
 	$('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
-	$('#checkInputTally').prop('checked', config.device.inputs.tally);
+	$('#checkInputTally').prop('checked', config.device.inputs.tally.enabled);
 
-	$('#radioInputTallyDisableSensor').prop('checked', config.device.tally.disableSensor);
-	$('#radioInputTallyTandomSensor').prop('checked', config.device.tally.tandomSensor);
+	$('#radioInputTallyDisableSensor').prop('checked', config.device.inputs.tally.disableSensor);
+	$('#radioInputTallyTandomSensor').prop('checked', config.device.inputs.tally.tandomSensor);
+
+	$('#checkOutputRelay').prop('checked', config.device.outputs.relay);
+	$('#checkOutputTriggerOtherBoard').prop('checked', config.device.outputs.triggerOtherBoard.enabled);
+	$('#inputOutputIPAddressOfOtherBoardToTrigger').val(config.device.outputs.triggerOtherBoard.ip);
 
 	$('#inputStartupMS').val(config.device.timings.startupMS);
 	$('#inputTimeOnMS').val(config.device.timings.timeOnMS);
 	$('#inputCooldownMS').val(config.device.timings.cooldownMS);
 	$('#inputLoopCount').val(config.device.timings.loopCount);
 
-	if (config.device.inputs.tally) {
+	if (config.device.inputs.tally.enabled) {
 		$('#deviceConfigFieldsetTally').show();
+	}
+
+	if (config.device.outputs.triggerOtherBoard.enabled) {
+		$('inputOutputIPAddressOfOtherBoardToTrigger').show();
+		$('inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
 	}
 
 	//network
@@ -471,12 +504,19 @@ function submitConfig() {
 				motionBlack: $('#checkInputMotionBlack').prop('checked'),
 				beam: $('#checkInputBeam').prop('checked'),
 				http: $('#checkInputHTTPRequests').prop('checked'),
-				tally: $('#checkInputTally').prop('checked')
+				tally: {
+					enabled: $('#checkInputTally').prop('checked'),
+					disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
+					tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
+				}
 			},
 
-			tally: {
-				disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
-				tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
+			outputs: {
+				relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
+				triggerOtherBoard: {
+					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
+					ip: $('#inputOutputIPAddressOfOtherBoardToTrigger').val()
+				}
 			},
 
 			timings: {
@@ -491,6 +531,7 @@ function submitConfig() {
 	};
 
 	wsEnqueue('S2' + JSON.stringify(json));
+	console.log(json);
 	toastr.success('Config saved!');
 }
 

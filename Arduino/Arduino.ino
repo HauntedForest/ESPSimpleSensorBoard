@@ -33,6 +33,9 @@ int deviceTimingsStartupMS = 0;
 int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
 int deviceTimingsLoopCount = 1;
+bool deviceOutputsRelayEnabled = true;
+bool deviceOutputsTriggerOtherBoardEnabled = false;
+String deviceOutputsTriggerOtherBoardIP = "";
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -246,29 +249,36 @@ void saveState(const JsonObject & json) {
 	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
 	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
-	device["inputs"]["tally"] = deviceInputsTally;
-	device["tally"]["disableSensor"] = deviceTallyDisableSensor;
-	device["tally"]["tandomSensor"] = deviceTallyTandomSensor;
+	device["inputs"]["tally"]["enabled"] = deviceInputsTally;
+	device["inputs"]["tally"]["disableSensor"] = deviceTallyDisableSensor;
+	device["inputs"]["tally"]["tandomSensor"] = deviceTallyTandomSensor;
 	device["timings"]["startupMS"] = deviceTimingsStartupMS;
 	device["timings"]["timeOnMS"] = deviceTimingsTimeOnMS;
 	device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
 	device["timings"]["loopCount"] = deviceTimingsLoopCount;
+	device["outputs"]["relay"] = deviceOutputsRelayEnabled;
+	device["outputs"]["triggerOtherBoard"]["enabled"] = deviceOutputsTriggerOtherBoardEnabled;
+	device["outputs"]["triggerOtherBoard"]["ip"] = deviceOutputsTriggerOtherBoardIP;
 }
 
 void loadState(const JsonObject & json) {
 	if (json.containsKey("device")) {
+		//const JsonObject device = json["device"].as<JsonObject>();
 		deviceName = json["device"]["id"].as < String > ();
 		if (json["device"].containsKey("inputs")) {
 			deviceInputsMotionWhite = json["device"]["inputs"]["motionWhite"].as < bool > ();
 			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as < bool > ();
 			deviceInputsBeam = json["device"]["inputs"]["beam"].as < bool > ();
 			deviceInputsHTTP = json["device"]["inputs"]["http"].as < bool > ();
-			deviceInputsTally = json["device"]["inputs"]["tally"].as < bool > ();
+			deviceInputsTally = json["device"]["inputs"]["tally"]["enabled"].as < bool > ();
+			deviceTallyDisableSensor = json["device"]["inputs"]["tally"]["disableSensor"].as < bool > ();
+			deviceTallyTandomSensor = json["device"]["inputs"]["tally"]["tandomSensor"].as < bool > ();
 		}
 
-		if (json["device"].containsKey("tally")) {
-			deviceTallyDisableSensor = json["device"]["tally"]["disableSensor"].as < bool > ();
-			deviceTallyTandomSensor = json["device"]["tally"]["tandomSensor"].as < bool > ();
+		if (json["device"].containsKey("outputs")) {
+			deviceOutputsRelayEnabled = json["device"]["outputs"]["relay"].as < bool > ();
+			deviceOutputsTriggerOtherBoardEnabled = json["device"]["outputs"]["triggerOtherBoard"]["enabled"].as < bool > ();
+			deviceOutputsTriggerOtherBoardIP = json["device"]["outputs"]["triggerOtherBoard"]["ip"].as < String > ();;
 		}
 
 		if (json["device"].containsKey("timings")) {
@@ -302,13 +312,25 @@ void checkForTrigger() {
 
 	if (activate) {
 		activate = false;
+
 		delay(deviceTimingsStartupMS);
 		for(int i = 0; i < deviceTimingsLoopCount; i++) {
-			digitalWrite(RELAY_PIN, HIGH);
+			if(deviceOutputsRelayEnabled) {
+				digitalWrite(RELAY_PIN, HIGH);
+			}
+
+			if(deviceOutputsTriggerOtherBoardEnabled) {
+				
+			}
+
 			delay(deviceTimingsTimeOnMS);
-			digitalWrite(RELAY_PIN, LOW);
-			delay(deviceTimingsTimeOnMS);
+
+			if(deviceOutputsRelayEnabled) {
+				digitalWrite(RELAY_PIN, LOW);
+				delay(deviceTimingsTimeOnMS);
+			}
 		}
+	
 		delay(deviceTimingsCooldownMS);
 	}
 }
