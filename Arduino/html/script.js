@@ -382,8 +382,8 @@ function getConfig(data) {
 	}
 
 	if (config.device.outputs.triggerOtherBoard.enabled) {
-		$('inputOutputIPAddressOfOtherBoardToTrigger').show();
-		$('inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
+		$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
+		$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
 	}
 
 	//network
