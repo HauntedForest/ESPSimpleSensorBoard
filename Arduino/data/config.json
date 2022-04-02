@@ -26,6 +26,13 @@
 		},
 		"outputs": {
 			"relay": true,
+			"triggerCameraRecord": {
+				"enabled": false,
+				"serverIP": "",
+				"camera": "",
+				"seconds": 0,
+				"minutes": 0
+			},
 			"triggerOtherBoard": {
 				"enabled": false,
 				"ip": "192.168.1.?/trigger"

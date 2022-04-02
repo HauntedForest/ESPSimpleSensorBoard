@@ -38,6 +38,12 @@ bool deviceOutputsRelayEnabled = true;
 bool deviceOutputsTriggerOtherBoardEnabled = false;
 String deviceOutputsTriggerOtherBoardIP = "";
 
+bool deviceOutputsTriggerCamera_enabled = false;
+String deviceOutputsTriggerCamera_serverIP = "";
+bool deviceOutputsTriggerCamera_camera = "";
+int deviceOutputsTriggerCamera_min = 0;
+int deviceOutputsTriggerCamera_sec = 0;
+
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
 const String TALLY_NONE = "none";
@@ -303,6 +309,12 @@ void saveState(const JsonObject &json)
 	device["outputs"]["relay"] = deviceOutputsRelayEnabled;
 	device["outputs"]["triggerOtherBoard"]["enabled"] = deviceOutputsTriggerOtherBoardEnabled;
 	device["outputs"]["triggerOtherBoard"]["ip"] = deviceOutputsTriggerOtherBoardIP;
+
+	device["outputs"]["triggerCameraRecord"]["enabled"] = deviceOutputsTriggerCamera_enabled;
+	device["outputs"]["triggerCameraRecord"]["serverIP"] = deviceOutputsTriggerCamera_serverIP;
+	device["outputs"]["triggerCameraRecord"]["camera"] = deviceOutputsTriggerCamera_camera;
+	device["outputs"]["triggerCameraRecord"]["seconds"] = deviceOutputsTriggerCamera_sec;
+	device["outputs"]["triggerCameraRecord"]["minutes"] = deviceOutputsTriggerCamera_min;
 }
 
 void loadState(const JsonObject &json)
@@ -327,7 +339,12 @@ void loadState(const JsonObject &json)
 			deviceOutputsRelayEnabled = json["device"]["outputs"]["relay"].as<bool>();
 			deviceOutputsTriggerOtherBoardEnabled = json["device"]["outputs"]["triggerOtherBoard"]["enabled"].as<bool>();
 			deviceOutputsTriggerOtherBoardIP = json["device"]["outputs"]["triggerOtherBoard"]["ip"].as<String>();
-			;
+
+			deviceOutputsTriggerCamera_enabled = json["device"]["outputs"]["triggerCameraRecord"]["enabled"].as<bool>();
+			deviceOutputsTriggerCamera_serverIP = json["device"]["outputs"]["triggerCameraRecord"]["serverIP"].as<String>();
+			deviceOutputsTriggerCamera_camera = json["device"]["outputs"]["triggerCameraRecord"]["camera"].as<String>();
+			deviceOutputsTriggerCamera_sec = json["device"]["outputs"]["triggerCameraRecord"]["seconds"].as<int>();
+			deviceOutputsTriggerCamera_min = json["device"]["outputs"]["triggerCameraRecord"]["minutes"].as<int>();
 		}
 
 		if (json["device"].containsKey("timings"))
@@ -366,18 +383,38 @@ void checkForTrigger()
 	{
 		activate = false;
 
+		//trigger camera record
+		if (deviceOutputsTriggerCamera_enabled)
+		{
+			String temp = "http://";
+			temp += deviceOutputsTriggerCamera_serverIP;
+			temp += "/trigger";
+			temp += "?location=" + deviceOutputsTriggerCamera_camera;
+			temp += "&minutes=" + deviceOutputsTriggerCamera_min;
+			temp += "&seconds=" + deviceOutputsTriggerCamera_sec;
+
+			//POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
+			asyncHTTPClient.init("POST", temp.c_str());
+			asyncHTTPClient.send(true);
+		}
+
 		delay(deviceTimingsStartupMS);
+
+		if (deviceOutputsTriggerOtherBoardEnabled)
+		{
+			//POST http://IP:80/trigger
+			String temp = "http://";
+			temp += deviceOutputsTriggerOtherBoardIP;
+			temp += "/trigger";
+			asyncHTTPClient.init("POST", temp.c_str());
+			asyncHTTPClient.send(true);
+		}
+
 		for (int i = 0; i < deviceTimingsLoopCount; i++)
 		{
 			if (deviceOutputsRelayEnabled)
 			{
 				digitalWrite(RELAY_PIN, HIGH);
-			}
-
-			if (deviceOutputsTriggerOtherBoardEnabled)
-			{
-				asyncHTTPClient.init("POST", deviceOutputsTriggerOtherBoardIP.c_str());
-				asyncHTTPClient.send(true);
 			}
 
 			delay(deviceTimingsTimeOnMS);

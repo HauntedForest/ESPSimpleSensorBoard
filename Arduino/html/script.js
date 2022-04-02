@@ -26,9 +26,9 @@ toastr.options = {
 };
 
 // jQuery doc ready
-$(function() {
+$(function () {
 	// Menu navigation for single page layout
-	$('ul.navbar-nav li a').click(function() {
+	$('ul.navbar-nav li a').click(function () {
 		// Highlight proper navbar item
 		$('.nav li').removeClass('active');
 		$(this).parent().addClass('active');
@@ -42,7 +42,7 @@ $(function() {
 		$('.navbar-toggle').attr('aria-expanded', 'false');
 
 		// Firmware selection and upload
-		$('#efu').change(function() {
+		$('#efu').change(function () {
 			$('#updatefw').submit();
 			$('#update').modal();
 		});
@@ -52,7 +52,7 @@ $(function() {
 	});
 
 	// Wifi field toggles.
-	$('#useWifi').click(function() {
+	$('#useWifi').click(function () {
 		if ($(this).is(':checked')) {
 			$('.useWifi').removeClass('hidden');
 		} else {
@@ -61,7 +61,7 @@ $(function() {
 	});
 
 	// DHCP field toggles
-	$('#dhcp').click(function() {
+	$('#dhcp').click(function () {
 		if ($(this).is(':checked')) {
 			$('.dhcp').addClass('hidden');
 		} else {
@@ -70,34 +70,34 @@ $(function() {
 	});
 
 	// Hostname, SSID, and Password validation
-	$('#useWifi').change(function() {
+	$('#useWifi').change(function () {
 		wifiValidation();
 	});
-	$('#hostname').keyup(function() {
+	$('#hostname').keyup(function () {
 		wifiValidation();
 	});
-	$('#staTimeout').keyup(function() {
+	$('#staTimeout').keyup(function () {
 		wifiValidation();
 	});
-	$('#ssid').keyup(function() {
+	$('#ssid').keyup(function () {
 		wifiValidation();
 	});
-	$('#password').keyup(function() {
+	$('#password').keyup(function () {
 		wifiValidation();
 	});
-	$('#ap').change(function() {
+	$('#ap').change(function () {
 		wifiValidation();
 	});
-	$('#dhcp').change(function() {
+	$('#dhcp').change(function () {
 		wifiValidation();
 	});
-	$('#gateway').keyup(function() {
+	$('#gateway').keyup(function () {
 		wifiValidation();
 	});
-	$('#ip').keyup(function() {
+	$('#ip').keyup(function () {
 		wifiValidation();
 	});
-	$('#netmask').keyup(function() {
+	$('#netmask').keyup(function () {
 		wifiValidation();
 	});
 
@@ -130,9 +130,29 @@ $(function() {
 		}
 	});
 
+	$('#checkOutputTriggerCameraRecord').on('change', (evt) => {
+		var checked = $(evt.target).prop('checked');
+		if (checked) {
+			$('#dropdownCameraLocation').show();
+			$('#inputCameraSeconds').show();
+			$('#inputCameraSecondsLabel').show();
+			$('#inputCameraMinutes').show();
+			$('#inputCameraMinutesLabel').show();
+			$('#imputCameraServerIP').show();
+			$('#imputCameraServerIPLabel').show();
+		} else {
+			$('#dropdownCameraLocation').hide();
+			$('#inputCameraSeconds').hide();
+			$('#inputCameraSecondsLabel').hide();
+			$('#inputCameraMinutes').hide();
+			$('#inputCameraMinutesLabel').hide();
+			$('#imputCameraServerIP').hide();
+			$('#imputCameraServerIPLabel').hide();
+		}
+	});
+
 	$('#checkOutputTriggerOtherBoard').on('change', (evt) => {
 		var checked = $(evt.target).prop('checked');
-		console.log(checked);
 		if (checked) {
 			$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
 			$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
@@ -182,10 +202,10 @@ function wifiValidation() {
 		if ($('#dhcp').prop('checked') === false) {
 			var iptest = new RegExp(
 				'' +
-					/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
-					/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
-					/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
-					/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
+				/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
+				/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
+				/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source +
+				/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
 			);
 
 			if (iptest.test($('#ip').val())) {
@@ -223,7 +243,7 @@ function feed() {
 	if ($('#home').is(':visible')) {
 		wsEnqueue('XJ');
 
-		setTimeout(function() {
+		setTimeout(function () {
 			feed();
 		}, 1000);
 	}
@@ -247,7 +267,7 @@ function wsConnect() {
 		ws = new WebSocket('ws://' + target + '/ws');
 		ws.binaryType = 'arraybuffer';
 
-		ws.onopen = function() {
+		ws.onopen = function () {
 			$('#wserror').modal('hide');
 			wsEnqueue('E1'); // Get html elements
 			wsEnqueue('G1'); // Get Config
@@ -256,7 +276,7 @@ function wsConnect() {
 			feed();
 		};
 
-		ws.onmessage = function(event) {
+		ws.onmessage = function (event) {
 			if (typeof event.data === 'string') {
 				var cmd = event.data.substr(0, 2);
 				var data = event.data.substr(2);
@@ -292,7 +312,7 @@ function wsConnect() {
 			wsReadyToSend();
 		};
 
-		ws.onclose = function() {
+		ws.onclose = function () {
 			$('#wserror').modal();
 			wsConnect();
 		};
@@ -329,7 +349,7 @@ function wsProcessQueue() {
 		//get next message from queue.
 		message = wsQueue.shift();
 		//set timeout to clear flag and try next message if response isn't recieved. Short timeout for message types that don't generate a response.
-		if ([ 'X6' ].indexOf(message.substr(0, 2))) {
+		if (['X6'].indexOf(message.substr(0, 2))) {
 			timeout = 40;
 		} else {
 			timeout = 2000;
@@ -381,10 +401,30 @@ function getConfig(data) {
 		$('#deviceConfigFieldsetTally').show();
 	}
 
+	//set camera stuff
+	$('#checkOutputTriggerCameraRecord').prop('checked', config.device.outputs.triggerCameraRecord.enabled);
+	$('#inputCameraSeconds').val(config.device.outputs.triggerCameraRecord.seconds);
+	$('#inputCameraMinutes').val(config.device.outputs.triggerCameraRecord.minutes);
+
+	$('#dropdownCameraLocation').text(config.device.outputs.triggerCameraRecord.camera);
+	$('#imputCameraServerIPLabel').val(config.device.outputs.triggerCameraRecord.serverIP);
+
+	if (config.device.outputs.triggerCameraRecord.enabled) {
+		$('#dropdownCameraLocation').show();
+		$('#inputCameraSeconds').show();
+		$('#inputCameraSecondsLabel').show();
+		$('#inputCameraMinutes').show();
+		$('#inputCameraMinutesLabel').show();
+		$('#imputCameraServerIP').show();
+		$('#imputCameraServerIPLabel').show();
+	}
+
 	if (config.device.outputs.triggerOtherBoard.enabled) {
 		$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
 		$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
 	}
+
+
 
 	//network
 	$('#useWifi').prop('checked', config.network.useWifi);
@@ -409,21 +449,21 @@ function getConfig(data) {
 	);
 	$('#netmask').val(
 		config.network.netmask[0] +
-			'.' +
-			config.network.netmask[1] +
-			'.' +
-			config.network.netmask[2] +
-			'.' +
-			config.network.netmask[3]
+		'.' +
+		config.network.netmask[1] +
+		'.' +
+		config.network.netmask[2] +
+		'.' +
+		config.network.netmask[3]
 	);
 	$('#gateway').val(
 		config.network.gateway[0] +
-			'.' +
-			config.network.gateway[1] +
-			'.' +
-			config.network.gateway[2] +
-			'.' +
-			config.network.gateway[3]
+		'.' +
+		config.network.gateway[1] +
+		'.' +
+		config.network.gateway[2] +
+		'.' +
+		config.network.gateway[3]
 	);
 }
 
@@ -485,9 +525,9 @@ function submitWiFi() {
 			passphrase: $('#password').val(),
 			hostname: $('#hostname').val(),
 			sta_timeout: parseInt($('#staTimeout').val()),
-			ip: [ parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3]) ],
-			netmask: [ parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3]) ],
-			gateway: [ parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3]) ],
+			ip: [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
+			netmask: [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
+			gateway: [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
 			dhcp: $('#dhcp').prop('checked'),
 			ap_fallback: $('#ap').prop('checked')
 		}
@@ -513,6 +553,13 @@ function submitConfig() {
 
 			outputs: {
 				relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
+				triggerCameraRecord: {
+					enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
+					serverIP: $('#imputCameraServerIPLabel').val(),
+					camera: $('#dropdownCameraLocation').text(),
+					seconds: parseInt($('#inputCameraSeconds').val()),
+					minutes: parseInt($('#inputCameraMinutes').val())
+				},
 				triggerOtherBoard: {
 					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
 					ip: $('#inputOutputIPAddressOfOtherBoardToTrigger').val()
@@ -538,7 +585,7 @@ function submitConfig() {
 function showReboot() {
 	$('#update').modal('hide');
 	$('#reboot').modal();
-	setTimeout(function() {
+	setTimeout(function () {
 		if ($('#dhcp').prop('checked')) {
 			window.location.assign('/');
 		} else {
