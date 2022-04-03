@@ -10,7 +10,12 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "ios": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "cstddef": "cpp",
+        "bitset": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp",
+        "algorithm": "cpp"
     }
    
 }

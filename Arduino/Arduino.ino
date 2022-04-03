@@ -2,6 +2,7 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #include "AsyncHttpClient.h"
+#include "SerialMP3Player.h"
 
 // OLED display width, in pixels
 #define SCREEN_WIDTH 128
@@ -15,10 +16,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const int forceAccessPointPin = D5; // Connect to ground to force access point.
 #define RELAY_PIN D6
 
-//white 4 pin PIR sensor
+// white 4 pin PIR sensor
 #define PIR_WHITE_TRIGGER_PIN D1
 #define BEAM_TRIGGER_PIN D7
-//3 pin PIR with board modification
+// 3 pin PIR with board modification
 #define PIR_BLACK_TRIGGER_PIN D0
 
 String deviceName = "Default";
@@ -57,8 +58,12 @@ bool startupRequestAP = false;
 
 bool activate = false;
 
-//send async http requests to other devices as a option output
+// send async http requests to other devices as a option output
 AsyncHttpClient asyncHTTPClient;
+
+// Audio
+#define SOUND_FINISH_BOOTING 1
+SerialMP3Player mp3;
 
 void led_on_request(AsyncWebServerRequest *request)
 {
@@ -74,25 +79,25 @@ void led_off_request(AsyncWebServerRequest *request)
 
 void requestTally(AsyncWebServerRequest *request)
 {
-	Serial.println("TALLY -> HIT!");
+	// Serial.println("TALLY -> HIT!");
 	if (!deviceInputsTally)
 	{
 		request->send(405, "text/plain", "Tally not Enabled");
-		Serial.println("TALLY -> Not enabled");
+		// Serial.println("TALLY -> Not enabled");
 		return;
 	}
 
 	if (!request->hasParam("bus"))
 	{
 		request->send(400, "text/plain", "Missing 'state' paramater");
-		Serial.println("TALLY -> Missing state");
+		// Serial.println("TALLY -> Missing state");
 		return;
 	}
 
 	if (!request->hasParam("on"))
 	{
 		request->send(400, "text/plain", "Missing 'on' paramater");
-		Serial.println("TALLY -> Missing state");
+		// Serial.println("TALLY -> Missing state");
 		return;
 	}
 
@@ -124,67 +129,67 @@ void requestTally(AsyncWebServerRequest *request)
 	else
 	{
 		request->send(400, "text/plain", "Error: 'state' paramater must be '" + TALLY_PREVIEW + "', '" + TALLY_PROGRAM + "'.");
-		Serial.println("TALLY -> Error: 'state' paramater must be");
+		// Serial.println("TALLY -> Error: 'state' paramater must be");
 		return;
 	}
 
-	//preview
+	// preview
 	if (!temp_tally_program && temp_tally_preview)
 	{
 		currentTallyState = TALLY_PREVIEW;
 	}
-	//program
+	// program
 	else if (temp_tally_program && !temp_tally_preview)
 	{
 		currentTallyState = TALLY_PROGRAM;
 	}
-	//preview & program = program
+	// preview & program = program
 	else if (temp_tally_preview && temp_tally_program)
 	{
 		currentTallyState = TALLY_PROGRAM;
 	}
-	//Not in a state
+	// Not in a state
 	else if (!temp_tally_preview && !temp_tally_program)
 	{
 		currentTallyState = TALLY_NONE;
 	}
 
-	Serial.print("TALLY -> ");
-	Serial.println(currentTallyState);
+	// Serial.print("TALLY -> ");
+	// Serial.println(currentTallyState);
 
-	Serial.println("TALLY -> Success");
+	// Serial.println("TALLY -> Success");
 	request->send(200, "text/plain", "Success");
 }
 
 void requestTrigger(AsyncWebServerRequest *request)
 {
 
-	Serial.println("1");
+	// Serial.println("1");
 
 	if (!deviceInputsHTTP)
 	{
-		Serial.println("E 1");
+		// Serial.println("E 1");
 		request->send(405, "text/plain", "HTTP requests not enabled");
-		Serial.println("E 2");
+		// Serial.println("E 2");
 		return;
 	}
-	Serial.println("2");
+	// Serial.println("2");
 	if (deviceInputsTally && currentTallyState != TALLY_PROGRAM)
 	{
-		Serial.println("E 3");
+		// Serial.println("E 3");
 		request->send(405, "text/plain", "Tally is not live (change)");
-		Serial.println("E 4");
+		// Serial.println("E 4");
 		return;
 	}
-	Serial.println("3");
+	// Serial.println("3");
 	activate = true;
-	Serial.println("4");
+	// Serial.println("4");
 	AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", "Success");
-	Serial.println("5");
+	// Serial.println("5");
 	response->addHeader("Connection", "Close");
-	Serial.println("6");
+	// Serial.println("6");
 	request->send(response);
-	Serial.println("7");
+	// Serial.println("7");
 }
 
 void setup()
@@ -202,7 +207,7 @@ void setup()
 	Wire.setClock(400000L);					   // set I2C clock to 400kHz
 	display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 128x32)
 
-	//disable screen wrapping
+	// disable screen wrapping
 	display.setTextWrap(false);
 
 	// Show initial message on the screen
@@ -228,6 +233,15 @@ void setup()
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
 	}
+
+	// Uses normal Serial
+	mp3.begin(9600);
+	delay(800); // wait for chip to turn on
+
+	mp3.sendCommand(CMD_SEL_DEV, 0, 2); // select sd-card
+	delay(800);							// wait for chip to select the SD card
+
+	mp3.play(SOUND_FINISH_BOOTING);
 }
 
 // Update the status on the OLED display.
@@ -266,7 +280,7 @@ void updateStatus(const connection_status_t &connectionStatus)
 
 	if (connectionStatus.status != CONNSTAT_NONE)
 	{
-		//display.print("SSID: ");
+		// display.print("SSID: ");
 		display.println(connectionStatus.ssid);
 	}
 
@@ -285,7 +299,7 @@ void updateStatus(const connection_status_t &connectionStatus)
 	if (connectionStatus.status == CONNSTAT_CONNECTED)
 	{
 		display.setCursor(114, 0);
-		display.println(connectionStatus.signalStrength - 1); //99 cap to not waste a character
+		display.println(connectionStatus.signalStrength - 1); // 99 cap to not waste a character
 	}
 
 	display.display();
@@ -321,7 +335,7 @@ void loadState(const JsonObject &json)
 {
 	if (json.containsKey("device"))
 	{
-		//const JsonObject device = json["device"].as<JsonObject>();
+		// const JsonObject device = json["device"].as<JsonObject>();
 		deviceName = json["device"]["id"].as<String>();
 		if (json["device"].containsKey("inputs"))
 		{
@@ -360,7 +374,7 @@ void loadState(const JsonObject &json)
 void checkForTrigger()
 {
 
-	//if tally is disabled, or its enabled in tandom mode
+	// if tally is disabled, or its enabled in tandom mode
 	if (!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_PROGRAM))
 	{
 		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW)
@@ -383,7 +397,7 @@ void checkForTrigger()
 	{
 		activate = false;
 
-		//trigger camera record
+		// trigger camera record
 		if (deviceOutputsTriggerCamera_enabled)
 		{
 			String temp = "http://";
@@ -393,7 +407,7 @@ void checkForTrigger()
 			temp += "&minutes=" + deviceOutputsTriggerCamera_min;
 			temp += "&seconds=" + deviceOutputsTriggerCamera_sec;
 
-			//POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
+			// POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
 			asyncHTTPClient.init("POST", temp.c_str());
 			asyncHTTPClient.send(true);
 		}
@@ -402,7 +416,7 @@ void checkForTrigger()
 
 		if (deviceOutputsTriggerOtherBoardEnabled)
 		{
-			//POST http://IP:80/trigger
+			// POST http://IP:80/trigger
 			String temp = "http://";
 			temp += deviceOutputsTriggerOtherBoardIP;
 			temp += "/trigger";
