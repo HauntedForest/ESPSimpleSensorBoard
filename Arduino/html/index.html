@@ -6,11 +6,12 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title id="title"></title>
-	<!-- for local development 
+	<!-- for local development-->
+
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="css/toastr.min.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
--->
+
 	<link rel="stylesheet" type="text/css" href="esps.css">
 </head>
 
@@ -33,6 +34,7 @@
 					<li class="active"><a href="#home">Home</a></li>
 					<li><a href="#wifi">Wireless Setup</a></li>
 					<li><a href="#config">Device Setup</a></li>
+					<li><a href="#test-variables">Test Input Variables</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href="#admin">Admin</a></li>
@@ -232,19 +234,52 @@
 							</div>
 
 							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerCameraRecord"
-									disabled>
+								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerCameraRecord">
 								<label class="custom-control-label" for="checkOutputTriggerCameraRecord">Trigger Camera
 									Record</label>
 							</div>
 
-							<label class="control-label col-sm-2" for="imputCameraServerIP"
-								id="imputCameraServerIPLabel" style="display:none;">Server IP</label>
-							<div class="col-sm-10"><input type="text" class="form-control" id="imputCameraServerIP"
-									inputmode="text" style="display:none;">
+							<div class="custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerOtherBoard">
+								<label class="custom-control-label" for="checkOutputTriggerOtherBoard">Trigger Other
+									Board</label>
 							</div>
 
-							<select id="dropdownCameraLocation" name="dropdownCameraLocation" style="display:none;">
+							<div class="custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="checkOutputPlayAudio">
+								<label class="custom-control-label" for="checkOutputPlayAudio">Play Audio</label>
+							</div>
+
+
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset id="deviceConfigFieldsetTriggerCameraRecord" style="display:none;">
+					<legend class="esps-legend">Trigger Camera Record</legend>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputTCRServerIP">Server IP</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRServerIP" oninput=""
+								inputmode="numeric">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputTCRMinutes">Minutes</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRMinutes"
+								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputTCRSeconds">Seconds</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRSeconds"
+								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputTCRCamera">Camera</label>
+						<div class="col-sm-10"><select id="outputTCRCamera" class="form-control"
+								data-role="select-dropdown" data-profile="minimal">
 								<option value="Serpent">Serpent</option>
 								<option value="WitchesArch">Witches Arch</option>
 								<option value="MinkieStage">Minkie Stage</option>
@@ -253,31 +288,27 @@
 								<option value="Cemetary">Cemetary</option>
 								<option value="BoneDevil">Bone Devil</option>
 							</select>
+						</div>
+					</div>
 
-							<label class="control-label col-sm-2" for="inputCameraSeconds" id="inputCameraSecondsLabel"
-								style="display:none;">Seconds</label>
-							<div class="col-sm-10"><input type="text" class="form-control" id="inputCameraSeconds"
-									inputmode="numeric" style="display:none;">
-							</div>
+					<!-- <select id="dropdownCameraLocation" name="dropdownCameraLocation" style="display:none;">
+						<option value="Serpent">Serpent</option>
+						<option value="WitchesArch">Witches Arch</option>
+						<option value="MinkieStage">Minkie Stage</option>
+						<option value="KoboltTrail">Kobolt Trail</option>
+						<option value="Vortex">Vortex</option>
+						<option value="Cemetary">Cemetary</option>
+						<option value="BoneDevil">Bone Devil</option>
+					</select> -->
 
-							<label class="control-label col-sm-2" for="inputCameraMinutes" id="inputCameraMinutesLabel"
-								style="display:none;">Minutes</label>
-							<div class="col-sm-10"><input type="text" class="form-control" id="inputCameraMinutes"
-									inputmode="numeric" style="display:none;">
-							</div>
+				</fieldset>
 
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerOtherBoard"
-									disabled>
-								<label class="custom-control-label" for="checkOutputTriggerOtherBoard">Trigger Other
-									Board</label>
-							</div>
-							<label class="control-label col-sm-2" for="inputOutputIPAddressOfOtherBoardToTrigger"
-								id="inputOutputIPAddressOfOtherBoardToTriggerLabel" style="display:none;">IP</label>
-							<div class="col-sm-10"><input type="text" class="form-control"
-									id="inputOutputIPAddressOfOtherBoardToTrigger" inputmode="decimal"
-									style="display:none;">
-							</div>
+				<fieldset id="deviceConfigFieldsetTriggerOtherBoard" style="display:none;">
+					<legend class="esps-legend">Trigger Other Board</legend>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputTCBServerIP">Server IP</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCBServerIP" oninput=""
+								inputmode="numeric">
 						</div>
 					</div>
 				</fieldset>
@@ -328,13 +359,35 @@
 					</div>
 				</fieldset>
 
+				<fieldset id="deviceConfigFieldsetAudio" style="display:none;">
+					<legend class="esps-legend">Audio Settings</legend>
+					<!-- <div class="custom-control custom-checkbox">
+						<input type="checkbox" class="custom-control-input" id="checkOutputAudioPlayOnTrigger">
+						<label class="custom-control-label" for="checkOutputAudioPlayOnTrigger">Play On Trigger</label>
+
+					</div> -->
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputAudioAmbient">Ambient Track</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputAudioAmbient"
+								oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="outputAudioTrigger">Trigger Track</label>
+						<div class="col-sm-10"><input type="text" class="form-control" id="outputAudioTrigger"
+								oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
+						</div>
+					</div>
+				</fieldset>
+
 				<fieldset>
 					<legend class="esps-legend">Misc</legend>
 
 					<div class="form-group">
 						<label class="control-label col-sm-2" for="devid">Device ID</label>
 						<div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid"
-								title="Plain text ID to help identify your device."></div>
+								title="Plain text ID to help identify your device."
+								placeholder="Plain text ID to help identify your device."></div>
 					</div>
 
 
@@ -343,8 +396,8 @@
 					<div class="form-group">
 						<div class="col-sm-offset-2 col-sm-10">
 							<button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
-							<button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
-								Config</button>
+							<!-- <button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
+								Config</button> -->
 						</div>
 					</div>
 
@@ -352,6 +405,26 @@
 
 
 			</form>
+		</div>
+
+		<!-- Test Variables -->
+		<div id="test-variables" class="mdiv hidden anchor">
+			<!-- <fieldset>
+				<legend class="esps-legend">Test Variables</legend>
+			</fieldset> -->
+
+			<fieldset>
+				<legend class="esps-legend">Sound Utilities</legend>
+
+				<div class="form-group">
+					<!-- <label class="control-label col-sm-2" for="soundId">Sound ID</label> -->
+					<div class="col-sm-2"><input type="number" class="form-control" id="soundId" name="soundId"
+							title="Plain text ID of the sound" min="2" max="255"></div>
+					<button type="button" onclick="playTestSound()" class="btn btn-primary">Test Sound</button>
+				</div>
+
+			</fieldset>
+
 		</div>
 
 		<!-- Administration -->
@@ -456,13 +529,14 @@
 		</div>
 	</footer>
 
-	<!-- for local development
+	<!-- for local development -->
+
 	<script type="text/javascript" src="js/jquery-3.1.1.js"></script>
 	<script type="text/javascript" src="js/bootstrap.js"></script>
 	<script type="text/javascript" src="js/jqColorPicker.js"></script>
 	<script type="text/javascript" src="js/toastr.min.js"></script>
 	<script type="text/javascript" src="script.js"></script>
--->
+
 	<script type="text/javascript" src="esps.js"></script>
 
 	<script>

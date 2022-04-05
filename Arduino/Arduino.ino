@@ -3,6 +3,7 @@
 #include "Adafruit_SSD1306.h"
 #include "AsyncHttpClient.h"
 #include "SerialMP3Player.h"
+#include "AsyncJson.h"
 
 // OLED display width, in pixels
 #define SCREEN_WIDTH 128
@@ -41,9 +42,13 @@ String deviceOutputsTriggerOtherBoardIP = "";
 
 bool deviceOutputsTriggerCamera_enabled = false;
 String deviceOutputsTriggerCamera_serverIP = "";
-bool deviceOutputsTriggerCamera_camera = "";
+String deviceOutputsTriggerCamera_camera = "";
 int deviceOutputsTriggerCamera_min = 0;
 int deviceOutputsTriggerCamera_sec = 0;
+
+bool deviceOutputsPlayAudio_enabled = false;
+int deviceOutputsPlayAudio_ambient = -1;
+int deviceOutputsPlayAudio_trigger = -1;
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -192,6 +197,16 @@ void requestTrigger(AsyncWebServerRequest *request)
 	// Serial.println("7");
 }
 
+void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
+{
+	// JsonObject &json = jsonRaw.as<JsonObject>();
+	uint8_t soundId = jsonRaw["soundId"].as<uint8_t>();
+
+	mp3.play(soundId);
+
+	request->send(200, "application/json", "{success:true}");
+}
+
 void setup()
 {
 	pinMode(forceAccessPointPin, INPUT_PULLUP);
@@ -232,6 +247,10 @@ void setup()
 		webServer->on("/tally", HTTP_POST, requestTally);
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
+
+		// webServer->on("/test/sound", HTTP_POST, requestTestSound);
+		AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/test/sound", requestTestSound);
+		webServer->addHandler(handler);
 	}
 
 	// Uses normal Serial
@@ -329,6 +348,10 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerCameraRecord"]["camera"] = deviceOutputsTriggerCamera_camera;
 	device["outputs"]["triggerCameraRecord"]["seconds"] = deviceOutputsTriggerCamera_sec;
 	device["outputs"]["triggerCameraRecord"]["minutes"] = deviceOutputsTriggerCamera_min;
+
+	device["outputs"]["triggerAudio"]["enabled"] = deviceOutputsPlayAudio_enabled;
+	device["outputs"]["triggerAudio"]["ambient"] = deviceOutputsPlayAudio_ambient;
+	device["outputs"]["triggerAudio"]["trigger"] = deviceOutputsPlayAudio_trigger;
 }
 
 void loadState(const JsonObject &json)
@@ -359,6 +382,10 @@ void loadState(const JsonObject &json)
 			deviceOutputsTriggerCamera_camera = json["device"]["outputs"]["triggerCameraRecord"]["camera"].as<String>();
 			deviceOutputsTriggerCamera_sec = json["device"]["outputs"]["triggerCameraRecord"]["seconds"].as<int>();
 			deviceOutputsTriggerCamera_min = json["device"]["outputs"]["triggerCameraRecord"]["minutes"].as<int>();
+
+			deviceOutputsPlayAudio_enabled = json["device"]["outputs"]["triggerAudio"]["enabled"].as<bool>();
+			deviceOutputsPlayAudio_ambient = json["device"]["outputs"]["triggerAudio"]["ambient"].as<int>();
+			deviceOutputsPlayAudio_trigger = json["device"]["outputs"]["triggerAudio"]["trigger"].as<int>();
 		}
 
 		if (json["device"].containsKey("timings"))

@@ -270,19 +270,20 @@ String SerialMP3Player::decodeMP3Answer()
 
 // returns the file count on a good day
 // returns -1 if bad shiz happened
-int SerialMP3Player::getNumberOfTracks()
-{
-    qTTracks();
-    delay(1020); // Not sure if this is needed, but it was how the orig code waited for a reply
-    sanswer();   // fills ansbuf.. this code is fucking weird but I don't want to redo it.
-    int count = -1;
-    if (ansbuf[3] == 0x48)
-    {
-        count = ansbuf[6];
-    }
-    ansbuf[3] = 0; // Clear ansbuff.
-    return count;
-}
+// THIS DOESN'T WORK WEIRDLY BUT WHATEVR
+// int SerialMP3Player::getNumberOfTracks()
+// {
+//     qTTracks();
+//     delay(1020); // Not sure if this is needed, but it was how the orig code waited for a reply
+//     sanswer();   // fills ansbuf.. this code is fucking weird but I don't want to redo it.
+//     int count = -1;
+//     if (ansbuf[3] == 0x48)
+//     {
+//         count = ansbuf[6];
+//     }
+//     ansbuf[3] = 0; // Clear ansbuff.
+//     return count;
+// }
 
 /********************************************************************************/
 /*Function: sbyte2hex. Returns a byte data in HEX format.	                */

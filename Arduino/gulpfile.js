@@ -16,31 +16,31 @@ const COMPILE_OPTIONS = {
 	UPLOAD_PY:
 		'C:\\Users\\eric\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.6.3\\tools\\upload.py',
 
-	COM_PORT: 'COM5',
+	COM_PORT: 'COM6',
 	BAUD: '256000'
 };
 
 /* HTML Task */
-gulp.task('html', function() {
+gulp.task('html', function () {
 	return gulp
-		.src([ 'html/*.html', 'html/*.htm' ])
+		.src(['html/*.html', 'html/*.htm'])
 		.pipe(plumber())
-		.pipe(
-			htmlmin({
-				collapseWhitespace: true,
-				removeComments: true,
-				minifyCSS: true,
-				minifyJS: true
-			})
-		)
+		// .pipe(
+		// 	htmlmin({
+		// 		collapseWhitespace: true,
+		// 		removeComments: true,
+		// 		minifyCSS: true,
+		// 		minifyJS: true
+		// 	})
+		// )
 		.pipe(gzip())
 		.pipe(gulp.dest('data/www'));
 });
 
 /* CSS Task */
-gulp.task('css', function() {
+gulp.task('css', function () {
 	return gulp
-		.src([ 'html/css/bootstrap.css', 'html/css/toastr.min.css', 'html/style.css' ])
+		.src(['html/css/bootstrap.css', 'html/css/toastr.min.css', 'html/style.css'])
 		.pipe(plumber())
 		.pipe(concat('esps.css'))
 		.pipe(cleancss())
@@ -49,7 +49,7 @@ gulp.task('css', function() {
 });
 
 /* JavaScript Task */
-gulp.task('js', function() {
+gulp.task('js', function () {
 	return gulp
 		.src([
 			'html/js/jquery*.js',
@@ -66,27 +66,27 @@ gulp.task('js', function() {
 });
 
 /* Image Task */
-gulp.task('image', function() {
-	return gulp.src([ 'html/**/*.png', 'html/**/*.ico' ]).pipe(plumber()).pipe(gulp.dest('data/www'));
+gulp.task('image', function () {
+	return gulp.src(['html/**/*.png', 'html/**/*.ico']).pipe(plumber()).pipe(gulp.dest('data/www'));
 });
 
 /* Clean Task */
-gulp.task('clean', function() {
-	return del([ 'data/www/*' ]);
+gulp.task('clean', function () {
+	return del(['data/www/*']);
 });
 
 /* Watch Task */
-gulp.task('watch', function() {
+gulp.task('watch', function () {
 	gulp.watch('html/*.html', gulp.series('html'));
 	gulp.watch('html/**/*.css', gulp.series('css'));
 	gulp.watch('html/**/*.js', gulp.series('js'));
 });
 
 /*Compile SPIFFS*/
-gulp.task('spiffs-compile', function(cb) {
+gulp.task('spiffs-compile', function (cb) {
 	let cmd = COMPILE_OPTIONS.MKSPIFFS + ' -c data -p 256 -b 8192 -s 2076672 tmp/out.spiffs.bin';
 	console.log('Command: ' + cmd);
-	exec(cmd, function(err, stdout, stderr) {
+	exec(cmd, function (err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
 		cb(err);
@@ -94,7 +94,7 @@ gulp.task('spiffs-compile', function(cb) {
 });
 
 /* Spiffs - upload to device */
-gulp.task('spiffs-upload', function(cb) {
+gulp.task('spiffs-upload', function (cb) {
 	let cmd =
 		COMPILE_OPTIONS.PYTHON3 +
 		' ' +
@@ -105,7 +105,7 @@ gulp.task('spiffs-upload', function(cb) {
 		COMPILE_OPTIONS.BAUD +
 		' write_flash 0x200000 tmp/out.spiffs.bin';
 	console.log('Command: ' + cmd);
-	exec(cmd, function(err, stdout, stderr) {
+	exec(cmd, function (err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
 		cb(err);
@@ -113,7 +113,7 @@ gulp.task('spiffs-upload', function(cb) {
 });
 
 /*Spiffs - Compile and upload to device */
-gulp.task('spiffs', gulp.series([ 'spiffs-compile', 'spiffs-upload' ]));
+gulp.task('spiffs', gulp.series(['spiffs-compile', 'spiffs-upload']));
 
 /* Default Task */
-gulp.task('default', gulp.series([ 'clean', 'html', 'css', 'js', 'image', 'spiffs' ]));
+gulp.task('default', gulp.series(['clean', 'html', 'css', 'js', 'image', 'spiffs']));

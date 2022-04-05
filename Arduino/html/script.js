@@ -133,32 +133,30 @@ $(function () {
 	$('#checkOutputTriggerCameraRecord').on('change', (evt) => {
 		var checked = $(evt.target).prop('checked');
 		if (checked) {
-			$('#dropdownCameraLocation').show();
-			$('#inputCameraSeconds').show();
-			$('#inputCameraSecondsLabel').show();
-			$('#inputCameraMinutes').show();
-			$('#inputCameraMinutesLabel').show();
-			$('#imputCameraServerIP').show();
-			$('#imputCameraServerIPLabel').show();
-		} else {
-			$('#dropdownCameraLocation').hide();
-			$('#inputCameraSeconds').hide();
-			$('#inputCameraSecondsLabel').hide();
-			$('#inputCameraMinutes').hide();
-			$('#inputCameraMinutesLabel').hide();
-			$('#imputCameraServerIP').hide();
-			$('#imputCameraServerIPLabel').hide();
+			$('#deviceConfigFieldsetTriggerCameraRecord').show();
+		}
+		else {
+			$('#deviceConfigFieldsetTriggerCameraRecord').hide();
 		}
 	});
 
 	$('#checkOutputTriggerOtherBoard').on('change', (evt) => {
 		var checked = $(evt.target).prop('checked');
 		if (checked) {
-			$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
-			$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
-		} else {
-			$('#inputOutputIPAddressOfOtherBoardToTrigger').hide();
-			$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').hide();
+			$('#deviceConfigFieldsetTriggerOtherBoard').show();
+		}
+		else {
+			$('#deviceConfigFieldsetTriggerOtherBoard').hide();
+		}
+	});
+
+	$('#checkOutputPlayAudio').on('change', (evt) => {
+		var checked = $(evt.target).prop('checked');
+		if (checked) {
+			$('#deviceConfigFieldsetAudio').show();
+		}
+		else {
+			$('#deviceConfigFieldsetAudio').hide();
 		}
 	});
 });
@@ -374,6 +372,7 @@ function wsReadyToSend() {
 
 function getConfig(data) {
 	var config = JSON.parse(data);
+
 	// devices
 	$('#title').text('ESP - ' + config.device.id);
 	$('#name').text(config.device.id);
@@ -403,28 +402,29 @@ function getConfig(data) {
 
 	//set camera stuff
 	$('#checkOutputTriggerCameraRecord').prop('checked', config.device.outputs.triggerCameraRecord.enabled);
-	$('#inputCameraSeconds').val(config.device.outputs.triggerCameraRecord.seconds);
-	$('#inputCameraMinutes').val(config.device.outputs.triggerCameraRecord.minutes);
+	$('#outputTCRSeconds').val(config.device.outputs.triggerCameraRecord.seconds);
+	$('#outputTCRMinutes').val(config.device.outputs.triggerCameraRecord.minutes);
 
-	$('#dropdownCameraLocation').text(config.device.outputs.triggerCameraRecord.camera);
-	$('#imputCameraServerIPLabel').val(config.device.outputs.triggerCameraRecord.serverIP);
+	$('#outputTCRCamera').val(config.device.outputs.triggerCameraRecord.camera);
+	$('#outputTCRServerIP').val(config.device.outputs.triggerCameraRecord.serverIP);
 
 	if (config.device.outputs.triggerCameraRecord.enabled) {
-		$('#dropdownCameraLocation').show();
-		$('#inputCameraSeconds').show();
-		$('#inputCameraSecondsLabel').show();
-		$('#inputCameraMinutes').show();
-		$('#inputCameraMinutesLabel').show();
-		$('#imputCameraServerIP').show();
-		$('#imputCameraServerIPLabel').show();
+		$('#deviceConfigFieldsetTriggerCameraRecord').show();
 	}
 
 	if (config.device.outputs.triggerOtherBoard.enabled) {
-		$('#inputOutputIPAddressOfOtherBoardToTrigger').show();
-		$('#inputOutputIPAddressOfOtherBoardToTriggerLabel').show();
+		$('#deviceConfigFieldsetTriggerOtherBoard').show();
 	}
 
 
+	//audio
+	$('#checkOutputPlayAudio').prop('checked', config.device.outputs.triggerAudio.enabled);
+	$('#outputAudioAmbient').val(config.device.outputs.triggerAudio.ambient == -1 ? "" : config.device.outputs.triggerAudio.ambient);
+	$('#outputAudioTrigger').val(config.device.outputs.triggerAudio.trigger == -1 ? "" : config.device.outputs.triggerAudio.trigger);
+
+	if (config.device.outputs.triggerAudio.enabled) {
+		$('#deviceConfigFieldsetAudio').show();
+	}
 
 	//network
 	$('#useWifi').prop('checked', config.network.useWifi);
@@ -555,22 +555,27 @@ function submitConfig() {
 				relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
 				triggerCameraRecord: {
 					enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
-					serverIP: $('#imputCameraServerIPLabel').val(),
-					camera: $('#dropdownCameraLocation').text(),
-					seconds: parseInt($('#inputCameraSeconds').val()),
-					minutes: parseInt($('#inputCameraMinutes').val())
+					serverIP: $('#outputTCRServerIP').val(),
+					camera: $('#outputTCRCamera').val(),
+					seconds: parseIntOrDefault($('#outputTCRSeconds').val(), 0),
+					minutes: parseIntOrDefault($('#outputTCRMinutes').val(), 0)
 				},
 				triggerOtherBoard: {
 					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
-					ip: $('#inputOutputIPAddressOfOtherBoardToTrigger').val()
+					ip: $('#outputTCBServerIP').val()
+				},
+				triggerAudio: {
+					enabled: $('#checkOutputPlayAudio').prop('checked'),
+					ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
+					trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1)
 				}
 			},
 
 			timings: {
-				startupMS: parseInt($('#inputStartupMS').val()),
-				timeOnMS: parseInt($('#inputTimeOnMS').val()),
-				cooldownMS: parseInt($('#inputCooldownMS').val()),
-				loopCount: parseInt($('#inputLoopCount').val())
+				startupMS: parseIntOrDefault($('#inputStartupMS').val(), 0),
+				timeOnMS: parseIntOrDefault($('#inputTimeOnMS').val(), 0),
+				cooldownMS: parseIntOrDefault($('#inputCooldownMS').val(), 0),
+				loopCount: parseIntOrDefault($('#inputLoopCount').val(), 0)
 			},
 
 			id: $('#devid').val()
@@ -580,6 +585,16 @@ function submitConfig() {
 	wsEnqueue('S2' + JSON.stringify(json));
 	console.log(json);
 	toastr.success('Config saved!');
+}
+
+function parseIntOrDefault(int, defaultVal) {
+	const val = parseInt(int);
+
+	if (isNaN(val)) {
+		return defaultVal;
+	}
+
+	return val;
 }
 
 function showReboot() {
@@ -605,4 +620,28 @@ function getKeyByValue(obj, value) {
 
 function inputOnlyNumbersCheck(element) {
 	element.value = element.value.replace(/[^0-9]/g, '').replace(/(\..*?)\..*/g, '$1');
+}
+
+function playTestSound() {
+	const sound = parseInt($("#soundId").val());
+	if (isNaN(sound) || sound > 255 || sound < 1) {
+		toastr.warning('Please enter a valid sound ID between 1-255', 'Error');
+		return;
+	}
+
+	$.ajax('/test/sound', {
+		type: 'POST',  // http method
+		dataType: "json",
+		contentType: "application/json",
+		data: JSON.stringify({ soundId: sound }),  // data to submit
+		success: function (data, status, xhr) {
+			toastr.success('Successfully sent a sound test request.', 'Success');
+		},
+		error: function (jqXhr, textStatus, errorMessage) {
+			toastr.error('Failed to send a sound test request. Error code: ' + errorMessage, 'Error');
+		}
+	});
+
+
+	console.log("SoundId", sound)
 }

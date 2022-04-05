@@ -36,6 +36,11 @@
 			"triggerOtherBoard": {
 				"enabled": false,
 				"ip": "192.168.1.?/trigger"
+			},
+			"triggerAudio": {
+				"enabled": false,
+				"ambient": -1,
+				"trigger": -1
 			}
 		},
 		"timings": {

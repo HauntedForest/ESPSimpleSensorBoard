@@ -88,7 +88,8 @@ public:
     void showDebug(bool on); // true to show debug messages
 
     // Eric
-    int getNumberOfTracks(); // Asks the board for number of tracks, then waits for a reply
+    // doesnt work
+    // int getNumberOfTracks(); // Asks the board for number of tracks, then waits for a reply
 
 private:
     String sanswer();
