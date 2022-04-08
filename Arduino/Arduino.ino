@@ -32,6 +32,9 @@ bool deviceInputsHTTP = true;
 bool deviceInputsTally = false;
 bool deviceTallyDisableSensor = false;
 bool deviceTallyTandomSensor = false;
+
+bool deviceInputsAlwaysOn = false;
+
 int deviceTimingsStartupMS = 0;
 int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
@@ -343,6 +346,8 @@ void saveState(const JsonObject &json)
 	device["inputs"]["tally"]["enabled"] = deviceInputsTally;
 	device["inputs"]["tally"]["disableSensor"] = deviceTallyDisableSensor;
 	device["inputs"]["tally"]["tandomSensor"] = deviceTallyTandomSensor;
+	device["inputs"]["alwaysOn"] = deviceInputsAlwaysOn;
+
 	device["timings"]["startupMS"] = deviceTimingsStartupMS;
 	device["timings"]["timeOnMS"] = deviceTimingsTimeOnMS;
 	device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
@@ -377,6 +382,7 @@ void loadState(const JsonObject &json)
 			deviceInputsTally = json["device"]["inputs"]["tally"]["enabled"].as<bool>();
 			deviceTallyDisableSensor = json["device"]["inputs"]["tally"]["disableSensor"].as<bool>();
 			deviceTallyTandomSensor = json["device"]["inputs"]["tally"]["tandomSensor"].as<bool>();
+			deviceInputsAlwaysOn = json["device"]["inputs"]["alwaysOn"].as<bool>();
 		}
 
 		if (json["device"].containsKey("outputs"))
@@ -426,6 +432,11 @@ void checkForTrigger()
 		{
 			activate = true;
 		}
+	}
+
+	if (deviceInputsAlwaysOn)
+	{
+		activate = true;
 	}
 
 	if (activate)
@@ -482,7 +493,7 @@ void checkForTrigger()
 
 		delay(deviceTimingsCooldownMS);
 
-		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
+		if (!deviceInputsAlwaysOn && deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 		{
 			delay(1020);
 			mp3.playSL(deviceOutputsPlayAudio_ambient);

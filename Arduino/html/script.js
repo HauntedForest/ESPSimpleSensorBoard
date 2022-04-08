@@ -383,6 +383,7 @@ function getConfig(data) {
 	$('#checkInputBeam').prop('checked', config.device.inputs.beam);
 	$('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
 	$('#checkInputTally').prop('checked', config.device.inputs.tally.enabled);
+	$('#checkInputAlwaysOn').prop('checked', config.device.inputs.alwaysOn);
 
 	$('#radioInputTallyDisableSensor').prop('checked', config.device.inputs.tally.disableSensor);
 	$('#radioInputTallyTandomSensor').prop('checked', config.device.inputs.tally.tandomSensor);
@@ -548,7 +549,8 @@ function submitConfig() {
 					enabled: $('#checkInputTally').prop('checked'),
 					disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
 					tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
-				}
+				},
+				alwaysOn: $('#checkInputAlwaysOn').prop('checked')
 			},
 
 			outputs: {

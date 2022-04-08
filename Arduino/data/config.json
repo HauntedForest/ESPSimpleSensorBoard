@@ -22,7 +22,8 @@
 				"enabled": false,
 				"disableSensor": true,
 				"tandomSensor": false
-			}
+			},
+			"alwaysOn": false
 		},
 		"outputs": {
 			"relay": true,
