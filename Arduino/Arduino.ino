@@ -248,6 +248,8 @@ void setup()
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
 
+		webServer->on("/test/trigger", HTTP_POST, requestTrigger);
+
 		// webServer->on("/test/sound", HTTP_POST, requestTestSound);
 		AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/test/sound", requestTestSound);
 		webServer->addHandler(handler);
@@ -261,6 +263,12 @@ void setup()
 	delay(800);							// wait for chip to select the SD card
 
 	mp3.play(SOUND_FINISH_BOOTING);
+
+	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
+	{
+		delay(1000);
+		mp3.playSL(deviceOutputsPlayAudio_ambient);
+	}
 }
 
 // Update the status on the OLED display.
@@ -441,6 +449,11 @@ void checkForTrigger()
 
 		delay(deviceTimingsStartupMS);
 
+		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
+		{
+			mp3.play(deviceOutputsPlayAudio_trigger);
+		}
+
 		if (deviceOutputsTriggerOtherBoardEnabled)
 		{
 			// POST http://IP:80/trigger
@@ -468,6 +481,12 @@ void checkForTrigger()
 		}
 
 		delay(deviceTimingsCooldownMS);
+
+		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
+		{
+			delay(1020);
+			mp3.playSL(deviceOutputsPlayAudio_ambient);
+		}
 	}
 }
 

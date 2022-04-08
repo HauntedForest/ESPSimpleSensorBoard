@@ -629,19 +629,46 @@ function playTestSound() {
 		return;
 	}
 
-	$.ajax('/test/sound', {
-		type: 'POST',  // http method
-		dataType: "json",
-		contentType: "application/json",
-		data: JSON.stringify({ soundId: sound }),  // data to submit
-		success: function (data, status, xhr) {
-			toastr.success('Successfully sent a sound test request.', 'Success');
-		},
-		error: function (jqXhr, textStatus, errorMessage) {
-			toastr.error('Failed to send a sound test request. Error code: ' + errorMessage, 'Error');
-		}
-	});
+	sendPostRequest('/test/sound', 'Successfully sent a sound test request.', 'Failed to send a sound test request.', { soundId: sound })
+
+	// $.ajax('/test/sound', {
+	// 	type: 'POST',  // http method
+	// 	dataType: "json",
+	// 	contentType: "application/json",
+	// 	data: JSON.stringify({ soundId: sound }),  // data to submit
+	// 	complete: function (xhr) {
+	// 		console.log(xhr)
+	// 		if (xhr.status == 200) {
+	// 			toastr.success('Successfully sent a sound test request.', 'Success');
+	// 		}
+	// 		else {
+	// 			toastr.error('Failed to send a sound test request. Error code: ' + xhr.status + ' - ' + xhr.statusText, 'Error');
+	// 		}
+	// 	},
+	// });
 
 
 	console.log("SoundId", sound)
+}
+
+function sendTestTriggerRequest() {
+	sendPostRequest('/test/trigger', 'Successfully triggered the board', 'Failed to trigger the board: %body% .');
+}
+
+function sendPostRequest(url, successMessage, failedMessage, data) {
+	$.ajax(url, {
+		type: 'POST',  // http method
+		dataType: (data == undefined ? null : "json"),
+		contentType: (data == undefined ? false : "application/json"),
+		data: (data == undefined ? null : JSON.stringify(data)),  // data to submit
+		complete: function (xhr) {
+			console.log(xhr)
+			if (xhr.status == 200) {
+				toastr.success(successMessage.replace('%body%', xhr.responseText), 'Success');
+			}
+			else {
+				toastr.error(failedMessage.replace('%body%', xhr.responseText) + ' Error code: ' + xhr.status + ' - ' + xhr.statusText, 'Error');
+			}
+		},
+	});
 }
