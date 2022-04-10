@@ -207,7 +207,7 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 
 	mp3.play(soundId);
 
-	request->send(200, "application/json", "{success:true}");
+	request->send(200, "text/html", "Success");
 }
 
 void setup()
