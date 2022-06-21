@@ -8,6 +8,7 @@ var terser = require('gulp-terser');
 var gzip = require('gulp-gzip');
 var del = require('del');
 var exec = require('child_process').exec;
+var header = require('gulp-header');
 //compile
 const COMPILE_OPTIONS = {
 	MKSPIFFS:
@@ -37,6 +38,7 @@ gulp.task('html', function () {
 		.pipe(gulp.dest('data/www'))
 });
 
+/* Generate HTML Task*/
 gulp.task('generate-html', function () {
 	return gulp
 		.src([
@@ -48,7 +50,13 @@ gulp.task('generate-html', function () {
 			'html/html/admin.html',
 			'html/html/_footer.html'
 		])
-		.pipe(concat('generated.html'))
+		.pipe(concat('index.html'))
+		.pipe(header(`<!--\n
+		Generated With Gulp @` + new Date() + `\n
+		*** DO NOT MANUALLY EDIT THIS FILE ***\n
+		
+		Edit project/html/html/ files, then run 'gulp generate-html'
+		-->\n`))
 		.pipe(gulp.dest('html'));
 });
 
@@ -131,4 +139,4 @@ gulp.task('spiffs-upload', function (cb) {
 gulp.task('spiffs', gulp.series(['spiffs-compile', 'spiffs-upload']));
 
 /* Default Task */
-gulp.task('default', gulp.series(['clean', 'html', 'css', 'js', 'image', 'spiffs']));
+gulp.task('default', gulp.series(['clean', 'generate-html', 'html', 'css', 'js', 'image', 'spiffs']));

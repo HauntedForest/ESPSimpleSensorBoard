@@ -27,5 +27,8 @@
 		"gulp-plumber": "^1.2.1",
 		"gulp-terser": "^1.4.1",
 		"gulp-uglify": "^3.0.1"
+	},
+	"dependencies": {
+		"gulp-header": "^2.0.9"
 	}
 }

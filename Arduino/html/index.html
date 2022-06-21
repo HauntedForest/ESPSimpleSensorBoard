@@ -1,534 +1,542 @@
+<!--
+
+		Generated With Gulp @Tue Jun 21 2022 14:14:47 GMT-0700 (Pacific Daylight Time)
+
+		*** DO NOT MANUALLY EDIT THIS FILE ***
+
+		
+		Edit project/html/html/ files, then run 'gulp generate-html'
+		-->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title id="title"></title>
-	<!-- for local development-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
+    <!-- for local development-->
 
-	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-	<link rel="stylesheet" type="text/css" href="css/toastr.min.css">
-	<link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/toastr.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
 
-	<link rel="stylesheet" type="text/css" href="esps.css">
+    <link rel="stylesheet" type="text/css" href="esps.css">
 </head>
 
 <body>
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-					aria-expanded="false" aria-controls="navbar">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#" id="name">ESP</a>
-			</div>
-			<div id="navbar" class="collapse navbar-collapse">
-				<ul class="nav navbar-nav">
-					<li class="active"><a href="#home">Home</a></li>
-					<li><a href="#wifi">Wireless Setup</a></li>
-					<li><a href="#config">Device Setup</a></li>
-					<li><a href="#test-variables">Test Input Variables</a></li>
-				</ul>
-				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#admin">Admin</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#" id="name">ESP</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#home">Home</a></li>
+                    <li><a href="#wifi">Wireless Setup</a></li>
+                    <li><a href="#config">Device Setup</a></li>
+                    <li><a href="#test-variables">Test Input Variables</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#admin">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-	<div class="container">
-		<!-- Home / Status page -->
-		<div id="home" class="collapse in mdiv anchor">
-			<div class="row">
-				<div class="col-sm-6">
-					<fieldset>
-						<legend class="esps-legend">Network Status</legend>
-						<table class="esps-table">
-							<tr>
-								<td width="33%">SSID</td>
-								<td><span id="x_ssid"></span></td>
-							</tr>
-							<tr>
-								<td width="33%">Hostname</td>
-								<td><span id="x_hostname"></span></td>
-							</tr>
-							<tr>
-								<td width="33%">IP</td>
-								<td><span id="x_ip"></span></td>
-							</tr>
-							<tr>
-								<td width="33%">MAC</td>
-								<td><span id="x_mac"></span></td>
-							</tr>
-							<tr>
-								<td width="33%">RSSI</td>
-								<td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td>
-							</tr>
-						</table>
-					</fieldset>
-					</br>
-					<fieldset>
-						<legend class="esps-legend">Device Status</legend>
-						<table class="esps-table">
-							<tr>
-								<td width="33%">Free Heap</td>
-								<td><span id="x_freeheap"></span></td>
-							</tr>
-							<tr>
-								<td width="33%">Up Time</td>
-								<td><span id="x_uptime"></span></td>
-							</tr>
-						</table>
-					</fieldset>
-				</div>
-			</div>
-		</div>
-
-		<!-- Network Configuration -->
-		<div id="wifi" class="mdiv hidden anchor">
-			<fieldset>
-				<legend class="esps-legend">Network Configuration</legend>
-				<form class="form-horizontal">
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<div class="checkbox"><label><input type="checkbox" id="useWifi" name="useWifi"
-										title="If unchecked, device will not attempt any WiFi connection.">Connect to
-									WiFi</label></div>
-						</div>
-					</div>
-					<div class="form-group useWifi" id="fg_ssid">
-						<label class="control-label col-sm-2" for="ssid">SSID</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid"
-								title="The SSID for your access point."></div>
-					</div>
-					<div class="form-group useWifi" id="fg_password">
-						<label class="control-label col-sm-2" for="password">Password</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="password" name="password"
-								title="The password for your access point."></div>
-					</div>
-					<div class="form-group useWifi" id="fg_hostname">
-						<label class="control-label col-sm-2" for="hostname">Hostname</label>
-						<div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname"
-								name="hostname" title="Hostname for this device."></div>
-					</div>
-					<div class="form-group useWifi" id="fg_staTimeout">
-						<label class="control-label col-sm-2" for="staTimeout">Client Timeout</label>
-						<div class="col-sm-10"><input type="text" class="form-control has-error" id="staTimeout"
-								name="staTimeout" title="When connecting as a client, this is the timeout in seconds.">
-						</div>
-					</div>
-					<div class="form-group useWifi">
-						<div class="col-sm-offset-2 col-sm-10">
-							<div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp"
-										title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
-						</div>
-					</div>
-					<div class="form-group useWifi dhcp" id="fg_ip">
-						<label class="control-label col-sm-2" for="ip">IP</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip"
-								title="Static IP Address">
-						</div>
-					</div>
-					<div class="form-group useWifi dhcp" id="fg_netmask">
-						<label class="control-label col-sm-2" for="netmask">Netmask</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask"
-								title="Static Netmask"></div>
-					</div>
-					<div class="form-group useWifi dhcp" id="fg_gateway">
-						<label class="control-label col-sm-2" for="gateway">Gateway</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway"
-								title="Static Gateway"></div>
-					</div>
-					<div class="form-group useWifi">
-						<div class="col-sm-offset-2 col-sm-10">
-							<div class="checkbox"><label><input type="checkbox" id="ap" name="ap"
-										title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices.">
-									AP Fallback</label></div>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary"
-								disabled>Save
-								Changes</button>
-						</div>
-					</div>
-				</form>
-			</fieldset>
-		</div>
-
-		<!-- Device Configuration -->
-		<div id="config" class="mdiv hidden anchor">
-			<form class="form-horizontal">
-
-
-				<fieldset>
-					<legend class="esps-legend">Inputs</legend>
-
-					<div class="form-group">
-						<div class="col-sm-10">
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputMotionWhite">
-								<label class="custom-control-label" for="checkInputMotionWhite">Motion Sensor
-									(White)</label>
-							</div>
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputMotionBlack">
-								<label class="custom-control-label" for="checkInputMotionBlack">Motion Sensor
-									(Black)</label>
-							</div>
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputBeam">
-								<label class="custom-control-label" for="checkInputBeam">Beam Sensor</label>
-							</div>
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputHTTPRequests">
-								<label class="custom-control-label" for="checkInputHTTPRequests">HTTP Requests</label>
-							</div>
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputTally">
-								<label class="custom-control-label" for="checkInputTally">Tally Arbiter</label>
-							</div>
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkInputAlwaysOn">
-								<label class="custom-control-label" for="checkInputAlwaysOn">Always On</label>
-							</div>
-						</div>
-					</div>
-				</fieldset>
-
-				<fieldset>
-					<legend class="esps-legend">Outputs</legend>
-
-					<div class="form-group">
-						<div class="col-sm-10">
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" checked id="checkOutputRelay">
-								<label class="custom-control-label" for="checkOutputRelay">Onboard Relay</label>
-							</div>
-
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerCameraRecord">
-								<label class="custom-control-label" for="checkOutputTriggerCameraRecord">Trigger Camera
-									Record</label>
-							</div>
-
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkOutputTriggerOtherBoard">
-								<label class="custom-control-label" for="checkOutputTriggerOtherBoard">Trigger Other
-									Board</label>
-							</div>
-
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" class="custom-control-input" id="checkOutputPlayAudio">
-								<label class="custom-control-label" for="checkOutputPlayAudio">Play Audio</label>
-							</div>
+    <div class="container">
+        <!-- START CONTAINER -->
+        <!-- Home / Status page -->
+        <div id="home" class="collapse in mdiv anchor">
+            <div class="row">
+                <div class="col-sm-6">
+                    <fieldset>
+                        <legend class="esps-legend">Network Status</legend>
+                        <table class="esps-table">
+                            <tr>
+                                <td width="33%">SSID</td>
+                                <td><span id="x_ssid"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%">Hostname</td>
+                                <td><span id="x_hostname"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%">IP</td>
+                                <td><span id="x_ip"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%">MAC</td>
+                                <td><span id="x_mac"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%">RSSI</td>
+                                <td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                    </br>
+                    <fieldset>
+                        <legend class="esps-legend">Device Status</legend>
+                        <table class="esps-table">
+                            <tr>
+                                <td width="33%">Free Heap</td>
+                                <td><span id="x_freeheap"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%">Up Time</td>
+                                <td><span id="x_uptime"></span></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <!-- Network Configuration -->
+        <div id="wifi" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">Network Configuration</legend>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="useWifi" name="useWifi"
+                                        title="If unchecked, device will not attempt any WiFi connection.">Connect to
+                                    WiFi</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group useWifi" id="fg_ssid">
+                        <label class="control-label col-sm-2" for="ssid">SSID</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid"
+                                title="The SSID for your access point."></div>
+                    </div>
+                    <div class="form-group useWifi" id="fg_password">
+                        <label class="control-label col-sm-2" for="password">Password</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password"
+                                title="The password for your access point."></div>
+                    </div>
+                    <div class="form-group useWifi" id="fg_hostname">
+                        <label class="control-label col-sm-2" for="hostname">Hostname</label>
+                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname"
+                                name="hostname" title="Hostname for this device."></div>
+                    </div>
+                    <div class="form-group useWifi" id="fg_staTimeout">
+                        <label class="control-label col-sm-2" for="staTimeout">Client Timeout</label>
+                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="staTimeout"
+                                name="staTimeout" title="When connecting as a client, this is the timeout in seconds.">
+                        </div>
+                    </div>
+                    <div class="form-group useWifi">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp"
+                                        title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group useWifi dhcp" id="fg_ip">
+                        <label class="control-label col-sm-2" for="ip">IP</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip"
+                                title="Static IP Address">
+                        </div>
+                    </div>
+                    <div class="form-group useWifi dhcp" id="fg_netmask">
+                        <label class="control-label col-sm-2" for="netmask">Netmask</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask"
+                                title="Static Netmask"></div>
+                    </div>
+                    <div class="form-group useWifi dhcp" id="fg_gateway">
+                        <label class="control-label col-sm-2" for="gateway">Gateway</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway"
+                                title="Static Gateway"></div>
+                    </div>
+                    <div class="form-group useWifi">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="ap" name="ap"
+                                        title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices.">
+                                    AP Fallback</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary"
+                                disabled>Save
+                                Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+        <!-- Device Configuration -->
+        <div id="config" class="mdiv hidden anchor">
+            <form class="form-horizontal">
 
 
-						</div>
-					</div>
-				</fieldset>
+                <fieldset>
+                    <legend class="esps-legend">Inputs</legend>
 
-				<fieldset id="deviceConfigFieldsetTriggerCameraRecord" style="display:none;">
-					<legend class="esps-legend">Trigger Camera Record</legend>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputTCRServerIP">Server IP</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRServerIP" oninput=""
-								inputmode="numeric">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputTCRMinutes">Minutes</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRMinutes"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputTCRSeconds">Seconds</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCRSeconds"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
-						</div>
-					</div>
+                    <div class="form-group">
+                        <div class="col-sm-10">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputMotionWhite">
+                                <label class="custom-control-label" for="checkInputMotionWhite">Motion Sensor
+                                    (White)</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputMotionBlack">
+                                <label class="custom-control-label" for="checkInputMotionBlack">Motion Sensor
+                                    (Black)</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputBeam">
+                                <label class="custom-control-label" for="checkInputBeam">Beam Sensor</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputHTTPRequests">
+                                <label class="custom-control-label" for="checkInputHTTPRequests">HTTP Requests</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputTally">
+                                <label class="custom-control-label" for="checkInputTally">Tally Arbiter</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkInputAlwaysOn">
+                                <label class="custom-control-label" for="checkInputAlwaysOn">Always On</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
 
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputTCRCamera">Camera</label>
-						<div class="col-sm-10"><select id="outputTCRCamera" class="form-control"
-								data-role="select-dropdown" data-profile="minimal">
-								<option value="Serpent">Serpent</option>
-								<option value="WitchesArch">Witches Arch</option>
-								<option value="MinkieStage">Minkie Stage</option>
-								<option value="KoboltTrail">Kobolt Trail</option>
-								<option value="Vortex">Vortex</option>
-								<option value="Cemetary">Cemetary</option>
-								<option value="BoneDevil">Bone Devil</option>
-							</select>
-						</div>
-					</div>
+                <fieldset>
+                    <legend class="esps-legend">Outputs</legend>
 
-					<!-- <select id="dropdownCameraLocation" name="dropdownCameraLocation" style="display:none;">
-						<option value="Serpent">Serpent</option>
-						<option value="WitchesArch">Witches Arch</option>
-						<option value="MinkieStage">Minkie Stage</option>
-						<option value="KoboltTrail">Kobolt Trail</option>
-						<option value="Vortex">Vortex</option>
-						<option value="Cemetary">Cemetary</option>
-						<option value="BoneDevil">Bone Devil</option>
-					</select> -->
+                    <div class="form-group">
+                        <div class="col-sm-10">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" checked id="checkOutputRelay">
+                                <label class="custom-control-label" for="checkOutputRelay">Onboard Relay</label>
+                            </div>
 
-				</fieldset>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkOutputTriggerCameraRecord">
+                                <label class="custom-control-label" for="checkOutputTriggerCameraRecord">Trigger Camera
+                                    Record</label>
+                            </div>
 
-				<fieldset id="deviceConfigFieldsetTriggerOtherBoard" style="display:none;">
-					<legend class="esps-legend">Trigger Other Board</legend>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputTCBServerIP">Server IP</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputTCBServerIP" oninput=""
-								inputmode="numeric">
-						</div>
-					</div>
-				</fieldset>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkOutputTriggerOtherBoard">
+                                <label class="custom-control-label" for="checkOutputTriggerOtherBoard">Trigger Other
+                                    Board</label>
+                            </div>
 
-				<fieldset id="deviceConfigFieldsetTally" style="display:none;">
-					<legend class="esps-legend">Tally Arbiter</legend>
-					<div class="form-group">
-						<div class="custom-control custom-radio">
-							<input type="radio" id="radioInputTallyDisableSensor" checked name="customRadio"
-								class="custom-control-input">
-							<label class="custom-control-label" for="radioInputTallyDisableSensor">When live, disable
-								sensor</label>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="custom-control custom-radio">
-							<input type="radio" id="radioInputTallyTandomSensor" name="customRadio"
-								class="custom-control-input">
-							<label class="custom-control-label" for="radioInputTallyTandomSensor">When live, sensor
-								still is
-								active in tandom with HTTP requests</label>
-						</div>
-					</div>
-				</fieldset>
-
-				<fieldset>
-					<legend class="esps-legend">Timings</legend>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="inputStartupMS">Startup (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="inputStartupMS"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="inputTimeOnMS">Time on (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="inputTimeOnMS"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="inputCooldownMS">Cooldown (ms)</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="inputCooldownMS"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="inputLoopCount">Times to loop</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="inputLoopCount"
-								oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
-					</div>
-				</fieldset>
-
-				<fieldset id="deviceConfigFieldsetAudio" style="display:none;">
-					<legend class="esps-legend">Audio Settings</legend>
-					<!-- <div class="custom-control custom-checkbox">
-						<input type="checkbox" class="custom-control-input" id="checkOutputAudioPlayOnTrigger">
-						<label class="custom-control-label" for="checkOutputAudioPlayOnTrigger">Play On Trigger</label>
-
-					</div> -->
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputAudioAmbient">Ambient Track</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputAudioAmbient"
-								oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="outputAudioTrigger">Trigger Track</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="outputAudioTrigger"
-								oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
-						</div>
-					</div>
-				</fieldset>
-
-				<fieldset>
-					<legend class="esps-legend">Misc</legend>
-
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="devid">Device ID</label>
-						<div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid"
-								title="Plain text ID to help identify your device."
-								placeholder="Plain text ID to help identify your device."></div>
-					</div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkOutputPlayAudio">
+                                <label class="custom-control-label" for="checkOutputPlayAudio">Play Audio</label>
+                            </div>
 
 
+                        </div>
+                    </div>
+                </fieldset>
 
-					<!-- Device Config Save -->
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
-							<!-- <button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
-								Config</button> -->
-						</div>
-					</div>
+                <fieldset id="deviceConfigFieldsetTriggerCameraRecord" style="display:none;">
+                    <legend class="esps-legend">Trigger Camera Record</legend>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputTCRServerIP">Server IP</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputTCRServerIP" oninput=""
+                                inputmode="numeric">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputTCRMinutes">Minutes</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputTCRMinutes"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputTCRSeconds">Seconds</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputTCRSeconds"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
+                        </div>
+                    </div>
 
-				</fieldset>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputTCRCamera">Camera</label>
+                        <div class="col-sm-10"><select id="outputTCRCamera" class="form-control"
+                                data-role="select-dropdown" data-profile="minimal">
+                                <option value="Serpent">Serpent</option>
+                                <option value="WitchesArch">Witches Arch</option>
+                                <option value="MinkieStage">Minkie Stage</option>
+                                <option value="KoboltTrail">Kobolt Trail</option>
+                                <option value="Vortex">Vortex</option>
+                                <option value="Cemetary">Cemetary</option>
+                                <option value="BoneDevil">Bone Devil</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- <select id="dropdownCameraLocation" name="dropdownCameraLocation" style="display:none;">
+                <option value="Serpent">Serpent</option>
+                <option value="WitchesArch">Witches Arch</option>
+                <option value="MinkieStage">Minkie Stage</option>
+                <option value="KoboltTrail">Kobolt Trail</option>
+                <option value="Vortex">Vortex</option>
+                <option value="Cemetary">Cemetary</option>
+                <option value="BoneDevil">Bone Devil</option>
+            </select> -->
+
+                </fieldset>
+
+                <fieldset id="deviceConfigFieldsetTriggerOtherBoard" style="display:none;">
+                    <legend class="esps-legend">Trigger Other Board</legend>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputTCBServerIP">Server IP</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputTCBServerIP" oninput=""
+                                inputmode="numeric">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset id="deviceConfigFieldsetTally" style="display:none;">
+                    <legend class="esps-legend">Tally Arbiter</legend>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="radioInputTallyDisableSensor" checked name="customRadio"
+                                class="custom-control-input">
+                            <label class="custom-control-label" for="radioInputTallyDisableSensor">When live, disable
+                                sensor</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="radioInputTallyTandomSensor" name="customRadio"
+                                class="custom-control-input">
+                            <label class="custom-control-label" for="radioInputTallyTandomSensor">When live, sensor
+                                still is
+                                active in tandom with HTTP requests</label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend class="esps-legend">Timings</legend>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="inputStartupMS">Startup (ms)</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="inputStartupMS"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="inputTimeOnMS">Time on (ms)</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="inputTimeOnMS"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="inputCooldownMS">Cooldown (ms)</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="inputCooldownMS"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="inputLoopCount">Times to loop</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="inputLoopCount"
+                                oninput="inputOnlyNumbersCheck(this)" inputmode="numeric"></div>
+                    </div>
+                </fieldset>
+
+                <fieldset id="deviceConfigFieldsetAudio" style="display:none;">
+                    <legend class="esps-legend">Audio Settings</legend>
+                    <!-- <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="checkOutputAudioPlayOnTrigger">
+                <label class="custom-control-label" for="checkOutputAudioPlayOnTrigger">Play On Trigger</label>
+
+            </div> -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputAudioAmbient">Ambient Track</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputAudioAmbient"
+                                oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="outputAudioTrigger">Trigger Track</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="outputAudioTrigger"
+                                oninput="" inputmode="numeric" placeholder="Leave blank to disable this option">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend class="esps-legend">Misc</legend>
+
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="devid">Device ID</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid"
+                                title="Plain text ID to help identify your device."
+                                placeholder="Plain text ID to help identify your device."></div>
+                    </div>
 
 
-			</form>
-		</div>
 
-		<!-- Test Variables -->
-		<div id="test-variables" class="mdiv hidden anchor">
-			<!-- <fieldset>
-				<legend class="esps-legend">Test Variables</legend>
-			</fieldset> -->
+                    <!-- Device Config Save -->
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
+                            <!-- <button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
+                        Config</button> -->
+                        </div>
+                    </div>
 
-			<fieldset>
-				<legend class="esps-legend">Sound Utilities</legend>
+                </fieldset>
 
-				<div class="form-group">
-					<!-- <label class="control-label col-sm-2" for="soundId">Sound ID</label> -->
-					<div class="col-sm-2"><input type="number" class="form-control" id="soundId" name="soundId"
-							title="Plain text ID of the sound" min="2" max="255"></div>
-					<button type="button" onclick="playTestSound()" class="btn btn-primary">Test Sound</button>
-				</div>
 
-				<legend class="esps-legend">Board Utilities</legend>
+            </form>
+        </div>
+        <!-- Test Variables -->
+        <div id="test-variables" class="mdiv hidden anchor">
+            <!-- <fieldset>
+        <legend class="esps-legend">Test Variables</legend>
+    </fieldset> -->
 
-				<div class="form-group">
-					<button type="button" onclick="sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
-				</div>
+            <fieldset>
+                <legend class="esps-legend">Sound Utilities</legend>
 
-			</fieldset>
+                <div class="form-group">
+                    <!-- <label class="control-label col-sm-2" for="soundId">Sound ID</label> -->
+                    <div class="col-sm-2"><input type="number" class="form-control" id="soundId" name="soundId"
+                            title="Plain text ID of the sound" min="2" max="255"></div>
+                    <button type="button" onclick="playTestSound()" class="btn btn-primary">Test Sound</button>
+                </div>
 
-		</div>
+                <legend class="esps-legend">Board Utilities</legend>
 
-		<!-- Administration -->
-		<div id="admin" class="mdiv hidden anchor">
-			<fieldset>
-				<legend class="esps-legend">Administration</legend>
-				<form class="form-horizontal" id="updatefw" action="/updatefw" method="post"
-					enctype="multipart/form-data">
-					<div class="form-group">
-						<label class="control-label col-sm-3">FW Version</label>
-						<div class="col-sm-9">
-							<p class="form-control-static" id="x_version"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-3">Build Date</label>
-						<div class="col-sm-9">
-							<p class="form-control-static" id="x_built"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-3">Used Flash Size</label>
-						<div class="col-sm-9">
-							<p class="form-control-static" id="x_usedflashsize"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-3">Real Flash Size</label>
-						<div class="col-sm-9">
-							<p class="form-control-static" id="x_realflashsize"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-3">Flash Chip ID</label>
-						<div class="col-sm-9">
-							<p class="form-control-static" id="x_flashchipid"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<label class="btn btn-primary btn-file">
-								Update Firmware <input type="file" id="efu" name="file" accept=".efu"
-									style="display: none;">
-							</label>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<button type="button" onclick="reboot()" class="btn btn-danger">Reboot</button>
-						</div>
-					</div>
-				</form>
-			</fieldset>
-		</div>
-	</div>
+                <div class="form-group">
+                    <button type="button" onclick="sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
+                </div>
 
-	<div id="snackbar">Configuration Saved</div>
+            </fieldset>
 
-	<!-- Reboot Modal -->
-	<div id="reboot" class="modal fade" tabindex="-1" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title">Restarting, Please Wait</h4>
-					<div class="bar"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+        </div>
+        <!-- Administration -->
+        <div id="admin" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">Administration</legend>
+                <form class="form-horizontal" id="updatefw" action="/updatefw" method="post"
+                    enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">FW Version</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" id="x_version"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Build Date</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" id="x_built"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Used Flash Size</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" id="x_usedflashsize"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Real Flash Size</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" id="x_realflashsize"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Flash Chip ID</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" id="x_flashchipid"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <label class="btn btn-primary btn-file">
+                                Update Firmware <input type="file" id="efu" name="file" accept=".efu"
+                                    style="display: none;">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" onclick="reboot()" class="btn btn-danger">Reboot</button>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+    </div>
+    <!-- END CONTAINER -->
+    </div>
 
-	<!-- Update Modal -->
-	<div id="update" class="modal fade" tabindex="-1" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title">Firmware Updating</h4>
-				</div>
-				<div class="modal-body">
-					<p>Firmware update in progress...</p>
-					<div class="bar"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div id="snackbar">Configuration Saved</div>
 
-	<!-- WebSockets Error Modal -->
-	<div id="wserror" class="modal fade" tabindex="-1" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
-					<div class="bar"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Reboot Modal -->
+    <div id="reboot" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Restarting, Please Wait</h4>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- Footer -->
-	<footer class="footer">
-		<div class="container">
-			<i><span id="name"></span></i>
-		</div>
-	</footer>
+    <!-- Update Modal -->
+    <div id="update" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Firmware Updating</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Firmware update in progress...</p>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- for local development -->
+    <!-- WebSockets Error Modal -->
+    <div id="wserror" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<script type="text/javascript" src="js/jquery-3.1.1.js"></script>
-	<script type="text/javascript" src="js/bootstrap.js"></script>
-	<script type="text/javascript" src="js/jqColorPicker.js"></script>
-	<script type="text/javascript" src="js/toastr.min.js"></script>
-	<script type="text/javascript" src="script.js"></script>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <i><span id="name"></span></i>
+        </div>
+    </footer>
 
-	<script type="text/javascript" src="esps.js"></script>
+    <!-- for local development -->
 
-	<script>
-		wsConnect();
-	</script>
+    <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jqColorPicker.js"></script>
+    <script type="text/javascript" src="js/toastr.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+
+    <script type="text/javascript" src="esps.js"></script>
+
+    <script>
+        wsConnect();
+    </script>
 </body>
 
 </html>
