@@ -1,8 +1,8 @@
 {
 	"network": {
 		"useWifi": true,
-		"ssid": "HFShow",
-		"passphrase": "Husky3087",
+		"ssid": "golde",
+		"passphrase": "ostrich!",
 		"hostname": "ESP",
 		"ip": [ 192, 168, 4, 100 ],
 		"netmask": [ 255, 255, 0, 0 ],

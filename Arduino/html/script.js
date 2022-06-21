@@ -1,7 +1,7 @@
 var mode = 'null';
-var wsQueue = [];
-var wsBusy = false;
-var wsTimerId;
+// var wsQueue = [];
+// var wsBusy = false;
+// var wsTimerId;
 
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
@@ -239,7 +239,12 @@ function wifiValidation() {
 // Page event feeds
 function feed() {
 	if ($('#home').is(':visible')) {
-		wsEnqueue('XJ');
+		//wsEnqueue('XJ');
+
+		sendGetRequest("stats", (statusCode, statusMessage, responseText) => {
+			console.log("stats", responseText);
+			getJsonStatus(responseText);
+		});
 
 		setTimeout(function () {
 			feed();
@@ -279,12 +284,12 @@ function wsConnect() {
 				var cmd = event.data.substr(0, 2);
 				var data = event.data.substr(2);
 				switch (cmd) {
-					case 'G1':
-						getConfig(data);
-						break;
-					case 'G2':
-						getConfigStatus(data);
-						break;
+					// case 'G1':
+					// 	getConfig(data);
+					// 	break;
+					// case 'G2':
+					// 	getConfigStatus(data);
+					// 	break;
 					case 'S1':
 						setConfig(data);
 						reboot();
@@ -292,9 +297,9 @@ function wsConnect() {
 					case 'S2':
 						setConfig(data);
 						break;
-					case 'XJ':
-						getJsonStatus(data);
-						break;
+					// case 'XJ':
+					// 	getJsonStatus(data);
+					// 	break;
 					case 'X6':
 						showReboot();
 						break;
@@ -657,20 +662,82 @@ function sendTestTriggerRequest() {
 	sendPostRequest('/test/trigger', 'Successfully triggered the board', 'Failed to trigger the board: %body% .');
 }
 
-function sendPostRequest(url, successMessage, failedMessage, data) {
-	$.ajax(url, {
-		type: 'POST',  // http method
-		dataType: (data == undefined ? null : "json"),
-		contentType: (data == undefined ? false : "application/json"),
-		data: (data == undefined ? null : JSON.stringify(data)),  // data to submit
-		complete: function (xhr) {
-			console.log(xhr)
-			if (xhr.status == 200) {
-				toastr.success(successMessage.replace('%body%', xhr.responseText), 'Success');
-			}
-			else {
-				toastr.error(failedMessage.replace('%body%', xhr.responseText) + ' Error code: ' + xhr.status + ' - ' + xhr.statusText, 'Error');
+function sendPostRequest(url, successMessage, failedMessage, data, onSuccessCallback, onErrorCallback) {
+	var dataType = "txt";
+	var contentType = "text/plain";
+
+	if (data == undefined || data == null) {
+		dataType = null;
+		contentType = false;
+	}
+
+	try {
+		data = JSON.stringify(data);
+		dataType = "json";
+		contentType = "application/json";
+	}
+	catch (notUsed) { }
+
+	sendAJAX(url, 'POST', dataType, contentType, data,
+		function onSuccess(statusCode, statusMessage, responseText) {
+			toastr.success(successMessage.replace('%body%', responseText), 'Success');
+			if (onSuccessCallback) {
+				onSuccessCallback(statusCode, statusMessage, responseText);
 			}
 		},
+		function onError(statusCode, statusMessage, responseText) {
+			toastr.error(failedMessage.replace('%body%', responseText) + ' Error code: ' + statusCode + ' - ' + statusMessage, 'Error');
+			if (onErrorCallback) {
+				onErrorCallback(statusCode, statusMessage, responseText);
+			}
+		}
+	);
+}
+
+function sendGetRequest(url, onSuccessCallback, onErrorCallback) {
+
+	sendAJAX(url, 'GET', null, false, null,
+		function onSuccess(statusCode, statusMessage, responseText) {
+			if (onSuccessCallback) {
+				onSuccessCallback(statusCode, statusMessage, responseText);
+			}
+		},
+		function onError(statusCode, statusMessage, responseText) {
+			if (onErrorCallback) {
+				onErrorCallback(statusCode, statusMessage, responseText);
+			}
+		}
+	);
+}
+
+function sendAJAX(url, method, dataType, contentType, data, onSuccess, onError) {
+
+	$.ajax(url, {
+		type: method,  // http method
+		dataType: dataType,
+		contentType: contentType,
+		data: data,  // data to submit
+		complete: function (xhr) {
+			if (xhr.status == 200) {
+				if (onSuccess != undefined) {
+					onSuccess(200, "Success", xhr.responseText);
+				}
+			}
+			else {
+				if (onError != undefined) {
+					onError(xhr.status, xhr.statusText, xhr.responseText)
+				}
+			}
+		},
+	});
+}
+
+function onStart() {
+	$('#wserror').modal('hide');
+	feed();
+
+	sendGetRequest("networkStatus", (statusCode, statusMessage, responseText) => {
+		console.log("networkStatus", responseText);
+		getConfigStatus(responseText);
 	});
 }
