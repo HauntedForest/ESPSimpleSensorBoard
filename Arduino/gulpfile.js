@@ -34,7 +34,22 @@ gulp.task('html', function () {
 		// 	})
 		// )
 		.pipe(gzip())
-		.pipe(gulp.dest('data/www'));
+		.pipe(gulp.dest('data/www'))
+});
+
+gulp.task('generate-html', function () {
+	return gulp
+		.src([
+			'html/html/_header.html',
+			'html/html/home.html',
+			'html/html/network.html',
+			'html/html/device.html',
+			'html/html/test.html',
+			'html/html/admin.html',
+			'html/html/_footer.html'
+		])
+		.pipe(concat('generated.html'))
+		.pipe(gulp.dest('html'));
 });
 
 /* CSS Task */

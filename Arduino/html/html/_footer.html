@@ -1,0 +1,67 @@
+<!-- END CONTAINER -->
+</div>
+
+<div id="snackbar">Configuration Saved</div>
+
+<!-- Reboot Modal -->
+<div id="reboot" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Restarting, Please Wait</h4>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div id="update" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Firmware Updating</h4>
+            </div>
+            <div class="modal-body">
+                <p>Firmware update in progress...</p>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebSockets Error Modal -->
+<div id="wserror" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <i><span id="name"></span></i>
+    </div>
+</footer>
+
+<!-- for local development -->
+
+<script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+<script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/jqColorPicker.js"></script>
+<script type="text/javascript" src="js/toastr.min.js"></script>
+<script type="text/javascript" src="script.js"></script>
+
+<script type="text/javascript" src="esps.js"></script>
+
+<script>
+    wsConnect();
+</script>
+</body>
+
+</html>
