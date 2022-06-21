@@ -42,21 +42,41 @@ gulp.task('html', function () {
 gulp.task('generate-html', function () {
 	return gulp
 		.src([
-			'html/html/_header.html',
-			'html/html/home.html',
-			'html/html/network.html',
-			'html/html/device.html',
-			'html/html/test.html',
-			'html/html/admin.html',
-			'html/html/_footer.html'
+			'html/pages/_header.html',
+			'html/pages/home/index.html',
+			'html/pages/network/index.html',
+			'html/pages/device/index.html',
+			'html/pages/test/index.html',
+			'html/pages/admin/index.html',
+			'html/pages/_footer.html'
 		])
 		.pipe(concat('index.html'))
 		.pipe(header(`<!--\n
 		Generated With Gulp @` + new Date() + `\n
 		*** DO NOT MANUALLY EDIT THIS FILE ***\n
 		
-		Edit project/html/html/ files, then run 'gulp generate-html'
+		Edit project/html/pages/ files, then run 'gulp generate-html'
 		-->\n`))
+		.pipe(gulp.dest('html'));
+});
+
+/* Generate JS Task*/
+gulp.task('generate-js', function () {
+	return gulp
+		.src([
+			'html/pages/home/script.js',
+			'html/pages/network/script.js',
+			'html/pages/device/script.js',
+			'html/pages/test/script.js',
+			'html/pages/admin/script.js',
+		])
+		.pipe(concat('generated.js'))
+		.pipe(header(`/*\n
+		Generated With Gulp @` + new Date() + `\n
+		*** DO NOT MANUALLY EDIT THIS FILE ***\n
+		
+		Edit project/html/pages/ files, then run 'gulp generate-js'
+		*/\n\n`))
 		.pipe(gulp.dest('html'));
 });
 
@@ -79,6 +99,7 @@ gulp.task('js', function () {
 			'html/js/bootstrap.js',
 			'html/js/jqColorPicker.js',
 			'html/js/toastr.min.js',
+			'html/generated.js',
 			'html/script.js'
 		])
 		.pipe(plumber())
@@ -139,4 +160,4 @@ gulp.task('spiffs-upload', function (cb) {
 gulp.task('spiffs', gulp.series(['spiffs-compile', 'spiffs-upload']));
 
 /* Default Task */
-gulp.task('default', gulp.series(['clean', 'generate-html', 'html', 'css', 'js', 'image', 'spiffs']));
+gulp.task('default', gulp.series(['clean', 'generate-html', 'html', 'css', 'generate-js', 'js', 'image', 'spiffs']));

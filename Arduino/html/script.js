@@ -105,60 +105,63 @@ $(function () {
 	var hash = window.location.hash;
 	hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
+	const evt = new Event('eg-setup');
+	window.dispatchEvent(evt);
+
 	//device setup
-	$('#checkInputTally').on('change', (evt) => {
-		var checked = $(evt.target).prop('checked');
-		if (checked) {
-			$('#deviceConfigFieldsetTally').show();
-			$('#checkInputHTTPRequests').prop('checked', true);
-		} else {
-			$('#deviceConfigFieldsetTally').hide();
-		}
-	});
+	// $('#checkInputTally').on('change', (evt) => {
+	// 	var checked = $(evt.target).prop('checked');
+	// 	if (checked) {
+	// 		$('#deviceConfigFieldsetTally').show();
+	// 		$('#checkInputHTTPRequests').prop('checked', true);
+	// 	} else {
+	// 		$('#deviceConfigFieldsetTally').hide();
+	// 	}
+	// });
 
-	$('#checkInputMotionWhite').on('change', (evt) => {
-		var checked = $('#checkInputMotionBlack').prop('checked');
-		if (checked) {
-			$('#checkInputMotionBlack').prop('checked', false);
-		}
-	});
+	// $('#checkInputMotionWhite').on('change', (evt) => {
+	// 	var checked = $('#checkInputMotionBlack').prop('checked');
+	// 	if (checked) {
+	// 		$('#checkInputMotionBlack').prop('checked', false);
+	// 	}
+	// });
 
-	$('#checkInputMotionBlack').on('change', (evt) => {
-		var checked = $('#checkInputMotionWhite').prop('checked');
-		if (checked) {
-			$('#checkInputMotionWhite').prop('checked', false);
-		}
-	});
+	// $('#checkInputMotionBlack').on('change', (evt) => {
+	// 	var checked = $('#checkInputMotionWhite').prop('checked');
+	// 	if (checked) {
+	// 		$('#checkInputMotionWhite').prop('checked', false);
+	// 	}
+	// });
 
-	$('#checkOutputTriggerCameraRecord').on('change', (evt) => {
-		var checked = $(evt.target).prop('checked');
-		if (checked) {
-			$('#deviceConfigFieldsetTriggerCameraRecord').show();
-		}
-		else {
-			$('#deviceConfigFieldsetTriggerCameraRecord').hide();
-		}
-	});
+	// $('#checkOutputTriggerCameraRecord').on('change', (evt) => {
+	// 	var checked = $(evt.target).prop('checked');
+	// 	if (checked) {
+	// 		$('#deviceConfigFieldsetTriggerCameraRecord').show();
+	// 	}
+	// 	else {
+	// 		$('#deviceConfigFieldsetTriggerCameraRecord').hide();
+	// 	}
+	// });
 
-	$('#checkOutputTriggerOtherBoard').on('change', (evt) => {
-		var checked = $(evt.target).prop('checked');
-		if (checked) {
-			$('#deviceConfigFieldsetTriggerOtherBoard').show();
-		}
-		else {
-			$('#deviceConfigFieldsetTriggerOtherBoard').hide();
-		}
-	});
+	// $('#checkOutputTriggerOtherBoard').on('change', (evt) => {
+	// 	var checked = $(evt.target).prop('checked');
+	// 	if (checked) {
+	// 		$('#deviceConfigFieldsetTriggerOtherBoard').show();
+	// 	}
+	// 	else {
+	// 		$('#deviceConfigFieldsetTriggerOtherBoard').hide();
+	// 	}
+	// });
 
-	$('#checkOutputPlayAudio').on('change', (evt) => {
-		var checked = $(evt.target).prop('checked');
-		if (checked) {
-			$('#deviceConfigFieldsetAudio').show();
-		}
-		else {
-			$('#deviceConfigFieldsetAudio').hide();
-		}
-	});
+	// $('#checkOutputPlayAudio').on('change', (evt) => {
+	// 	var checked = $(evt.target).prop('checked');
+	// 	if (checked) {
+	// 		$('#deviceConfigFieldsetAudio').show();
+	// 	}
+	// 	else {
+	// 		$('#deviceConfigFieldsetAudio').hide();
+	// 	}
+	// });
 });
 
 function wifiValidation() {
@@ -373,11 +376,15 @@ function wsReadyToSend() {
 function getConfig(data) {
 	var config = JSON.parse(data);
 
+	const evt = new CustomEvent('eg-config-load', { detail: config });
+	window.dispatchEvent(evt);
+
 	// devices
+
 	$('#title').text('ESP - ' + config.device.id);
 	$('#name').text(config.device.id);
 	$('#devid').val(config.device.id);
-
+	/*
 	$('#checkInputMotionWhite').prop('checked', config.device.inputs.motionWhite);
 	$('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
 	$('#checkInputBeam').prop('checked', config.device.inputs.beam);
@@ -466,6 +473,7 @@ function getConfig(data) {
 		'.' +
 		config.network.gateway[3]
 	);
+	*/
 }
 
 function getConfigStatus(data) {
@@ -538,51 +546,57 @@ function submitWiFi() {
 }
 
 function submitConfig() {
-	var json = {
-		device: {
-			inputs: {
-				motionWhite: $('#checkInputMotionWhite').prop('checked'),
-				motionBlack: $('#checkInputMotionBlack').prop('checked'),
-				beam: $('#checkInputBeam').prop('checked'),
-				http: $('#checkInputHTTPRequests').prop('checked'),
-				tally: {
-					enabled: $('#checkInputTally').prop('checked'),
-					disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
-					tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
-				},
-				alwaysOn: $('#checkInputAlwaysOn').prop('checked')
-			},
 
-			outputs: {
-				relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
-				triggerCameraRecord: {
-					enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
-					serverIP: $('#outputTCRServerIP').val(),
-					camera: $('#outputTCRCamera').val(),
-					seconds: parseIntOrDefault($('#outputTCRSeconds').val(), 0),
-					minutes: parseIntOrDefault($('#outputTCRMinutes').val(), 0)
-				},
-				triggerOtherBoard: {
-					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
-					ip: $('#outputTCBServerIP').val()
-				},
-				triggerAudio: {
-					enabled: $('#checkOutputPlayAudio').prop('checked'),
-					ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
-					trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1)
-				}
-			},
+	const evt = new CustomEvent('eg-config-save', { detail: new Object() });
+	window.dispatchEvent(evt);
 
-			timings: {
-				startupMS: parseIntOrDefault($('#inputStartupMS').val(), 0),
-				timeOnMS: parseIntOrDefault($('#inputTimeOnMS').val(), 0),
-				cooldownMS: parseIntOrDefault($('#inputCooldownMS').val(), 0),
-				loopCount: parseIntOrDefault($('#inputLoopCount').val(), 0)
-			},
+	var json = evt.detail;
 
-			id: $('#devid').val()
-		}
-	};
+	// var json = {
+	// 	device: {
+	// 		inputs: {
+	// 			motionWhite: $('#checkInputMotionWhite').prop('checked'),
+	// 			motionBlack: $('#checkInputMotionBlack').prop('checked'),
+	// 			beam: $('#checkInputBeam').prop('checked'),
+	// 			http: $('#checkInputHTTPRequests').prop('checked'),
+	// 			tally: {
+	// 				enabled: $('#checkInputTally').prop('checked'),
+	// 				disableSensor: $('#radioInputTallyDisableSensor').prop('checked'),
+	// 				tandomSensor: $('#radioInputTallyTandomSensor').prop('checked')
+	// 			},
+	// 			alwaysOn: $('#checkInputAlwaysOn').prop('checked')
+	// 		},
+
+	// 		outputs: {
+	// 			relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
+	// 			triggerCameraRecord: {
+	// 				enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
+	// 				serverIP: $('#outputTCRServerIP').val(),
+	// 				camera: $('#outputTCRCamera').val(),
+	// 				seconds: parseIntOrDefault($('#outputTCRSeconds').val(), 0),
+	// 				minutes: parseIntOrDefault($('#outputTCRMinutes').val(), 0)
+	// 			},
+	// 			triggerOtherBoard: {
+	// 				enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
+	// 				ip: $('#outputTCBServerIP').val()
+	// 			},
+	// 			triggerAudio: {
+	// 				enabled: $('#checkOutputPlayAudio').prop('checked'),
+	// 				ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
+	// 				trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1)
+	// 			}
+	// 		},
+
+	// 		timings: {
+	// 			startupMS: parseIntOrDefault($('#inputStartupMS').val(), 0),
+	// 			timeOnMS: parseIntOrDefault($('#inputTimeOnMS').val(), 0),
+	// 			cooldownMS: parseIntOrDefault($('#inputCooldownMS').val(), 0),
+	// 			loopCount: parseIntOrDefault($('#inputLoopCount').val(), 0)
+	// 		},
+
+	// 		id: $('#devid').val()
+	// 	}
+	// };
 
 	wsEnqueue('S2' + JSON.stringify(json));
 	console.log(json);
