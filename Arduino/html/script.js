@@ -428,6 +428,13 @@ function parseIntOrDefault(int, defaultVal) {
 	return val;
 }
 
+function parseStringOrDefault(string, defaultVal) {
+	if (string == undefined || string == null) {
+		return defaultVal;
+	}
+	return string;
+}
+
 function showReboot() {
 	$('#update').modal('hide');
 	$('#reboot').modal();
@@ -453,52 +460,69 @@ function inputOnlyNumbersCheck(element) {
 	element.value = element.value.replace(/[^0-9]/g, '').replace(/(\..*?)\..*/g, '$1');
 }
 
-function playTestSound() {
-	const sound = parseInt($("#soundId").val());
-	if (isNaN(sound) || sound > 255 || sound < 1) {
-		toastr.warning('Please enter a valid sound ID between 1-255', 'Error');
-		return;
+function sendGetRequest(url, onSuccessCallback, onErrorCallback) {
+
+	sendAJAX(url, 'GET', null, false, null,
+		function onSuccess(responseText) {
+			if (onSuccessCallback) {
+				onSuccessCallback(responseText);
+			}
+		},
+		function onError(statusCode, statusMessage, responseText) {
+			if (onErrorCallback) {
+				onErrorCallback(statusCode, statusMessage, responseText);
+			}
+		}
+	);
+}
+
+function sendPostRequest(url, data, onSuccessCallback, onErrorCallback) {
+	var dataType = "txt";
+	var contentType = "text/plain";
+
+	if (data == undefined || data == null) {
+		dataType = null;
+		contentType = false;
 	}
 
-	sendPostRequest('/test/sound', 'Successfully sent a sound test request.', 'Failed to send a sound test request.', { soundId: sound })
+	try {
+		data = JSON.stringify(data);
+		dataType = "json";
+		contentType = "application/json";
+	}
+	catch (notUsed) { }
 
-	// $.ajax('/test/sound', {
-	// 	type: 'POST',  // http method
-	// 	dataType: "json",
-	// 	contentType: "application/json",
-	// 	data: JSON.stringify({ soundId: sound }),  // data to submit
-	// 	complete: function (xhr) {
-	// 		console.log(xhr)
-	// 		if (xhr.status == 200) {
-	// 			toastr.success('Successfully sent a sound test request.', 'Success');
-	// 		}
-	// 		else {
-	// 			toastr.error('Failed to send a sound test request. Error code: ' + xhr.status + ' - ' + xhr.statusText, 'Error');
-	// 		}
-	// 	},
-	// });
-
-
-	console.log("SoundId", sound)
+	sendAJAX(url, 'POST', dataType, contentType, data,
+		function onSuccess(responseText) {
+			if (onSuccessCallback) {
+				onSuccessCallback(responseText);
+			}
+		},
+		function onError(statusCode, statusMessage, responseText) {
+			if (onErrorCallback) {
+				onErrorCallback(statusCode, statusMessage, responseText);
+			}
+		}
+	);
 }
 
-function sendTestTriggerRequest() {
-	sendPostRequest('/test/trigger', 'Successfully triggered the board', 'Failed to trigger the board: %body% .');
-}
+function sendAJAX(url, method, dataType, contentType, data, onSuccess, onError) {
 
-function sendPostRequest(url, successMessage, failedMessage, data) {
 	$.ajax(url, {
-		type: 'POST',  // http method
-		dataType: (data == undefined ? null : "json"),
-		contentType: (data == undefined ? false : "application/json"),
-		data: (data == undefined ? null : JSON.stringify(data)),  // data to submit
+		type: method,  // http method
+		dataType: dataType,
+		contentType: contentType,
+		data: data,  // data to submit
 		complete: function (xhr) {
-			console.log(xhr)
 			if (xhr.status == 200) {
-				toastr.success(successMessage.replace('%body%', xhr.responseText), 'Success');
+				if (onSuccess) {
+					onSuccess(xhr.responseText);
+				}
 			}
 			else {
-				toastr.error(failedMessage.replace('%body%', xhr.responseText) + ' Error code: ' + xhr.status + ' - ' + xhr.statusText, 'Error');
+				if (onError) {
+					onError(xhr.status, xhr.statusText, xhr.responseText)
+				}
 			}
 		},
 	});

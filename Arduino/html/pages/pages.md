@@ -40,3 +40,41 @@ Tries to parse input as a int. If it fails or is null/undefined, default to the 
 ```js
 parseIntOrDefault($('#outputTCRMinutes').val(), 0)
 ```
+
+## parseStringOrDefault(int, defaultVal)
+If the input is null or undefined, use the default value. Else, use the inputted value. Is this useless, probs so.
+```js
+parseStringOrDefault($('#camera').val(), "none")
+```
+
+## sendGETRequest(url, onSuccessCallback, onErrorCallback)
+```js
+sendPostRequest('status',
+
+		//success
+		(responseText) => {
+			//process status text
+		},
+
+		//fail
+		(statusCode, statusMessage, responseText) => {
+			toastr.error('Failed to get status the board: ' + responseText + ' Error code: ' + statusCode + ' - ' + statusMessage, 'Error');
+		});
+```
+
+## sendPostRequest(url, data, onSuccessCallback, onErrorCallback)
+```js
+sendPostRequest('/test/trigger',
+        //Not sending data
+		null,
+
+		//success
+		(responseText) => {
+			toastr.success('Successfully triggered the board', 'Success');
+		},
+
+		//fail
+		(statusCode, statusMessage, responseText) => {
+			toastr.error('Failed to trigger the board: ' + responseText + ' Error code: ' + statusCode + ' - ' + statusMessage, 'Error');
+		});
+```
