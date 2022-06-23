@@ -53,8 +53,9 @@ int deviceOutputsTriggerCamera_min = 0;
 int deviceOutputsTriggerCamera_sec = 0;
 
 bool deviceOutputsPlayAudio_enabled = false;
-int deviceOutputsPlayAudio_ambient = -1;
-int deviceOutputsPlayAudio_trigger = -1;
+uint16_t deviceOutputsPlayAudio_ambient = -1;
+uint16_t deviceOutputsPlayAudio_trigger = -1;
+uint16_t deviceOutputsPlayAudio_volume = 15; // 0-30. 15 = 50%
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -210,9 +211,20 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 	uint8_t soundId = jsonRaw["soundId"].as<uint8_t>();
 
 	// mp3.play(soundId);
+	mp3player.setVolume(deviceOutputsPlayAudio_volume);
+	mp3player.setCycleMode(DY::PlayMode::OneOff);
 	mp3player.playSpecified(soundId);
 
 	request->send(200, "text/html", "Success");
+
+	// go back to ambient if needed
+	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
+	{
+		delay(1000);
+		// mp3.playSL(deviceOutputsPlayAudio_ambient);
+		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
+		mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
+	}
 }
 
 void setup()
@@ -277,7 +289,7 @@ void setup()
 	// mp3.begin(9600);
 	mp3player.begin();
 	delay(800);
-	mp3player.setVolume(15); // 50% volume
+	mp3player.setVolume(deviceOutputsPlayAudio_volume);
 
 	Serial.begin(9600);
 
@@ -291,6 +303,7 @@ void setup()
 	{
 		delay(1000);
 		// mp3.playSL(deviceOutputsPlayAudio_ambient);
+		mp3player.setVolume(deviceOutputsPlayAudio_volume);
 		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 		mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 	}
@@ -386,6 +399,7 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerAudio"]["enabled"] = deviceOutputsPlayAudio_enabled;
 	device["outputs"]["triggerAudio"]["ambient"] = deviceOutputsPlayAudio_ambient;
 	device["outputs"]["triggerAudio"]["trigger"] = deviceOutputsPlayAudio_trigger;
+	device["outputs"]["triggerAudio"]["volume"] = deviceOutputsPlayAudio_volume;
 }
 
 void loadState(const JsonObject &json)
@@ -418,8 +432,9 @@ void loadState(const JsonObject &json)
 			deviceOutputsTriggerCamera_min = json["device"]["outputs"]["triggerCameraRecord"]["minutes"].as<int>();
 
 			deviceOutputsPlayAudio_enabled = json["device"]["outputs"]["triggerAudio"]["enabled"].as<bool>();
-			deviceOutputsPlayAudio_ambient = json["device"]["outputs"]["triggerAudio"]["ambient"].as<int>();
-			deviceOutputsPlayAudio_trigger = json["device"]["outputs"]["triggerAudio"]["trigger"].as<int>();
+			deviceOutputsPlayAudio_ambient = json["device"]["outputs"]["triggerAudio"]["ambient"].as<uint16_t>();
+			deviceOutputsPlayAudio_trigger = json["device"]["outputs"]["triggerAudio"]["trigger"].as<uint16_t>();
+			deviceOutputsPlayAudio_volume = json["device"]["outputs"]["triggerAudio"]["volume"].as<uint16_t>();
 		}
 
 		if (json["device"].containsKey("timings"))
@@ -478,6 +493,7 @@ void checkForTrigger()
 		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
 		{
 			// mp3.play(deviceOutputsPlayAudio_trigger);
+			mp3player.setVolume(deviceOutputsPlayAudio_volume);
 			mp3player.setCycleMode(DY::PlayMode::OneOff); // play sound once
 			mp3player.playSpecified(deviceOutputsPlayAudio_trigger);
 		}
@@ -514,6 +530,7 @@ void checkForTrigger()
 		{
 			delay(1020);
 			// mp3.playSL(deviceOutputsPlayAudio_ambient);
+			mp3player.setVolume(deviceOutputsPlayAudio_volume);
 			mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 			mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 		}

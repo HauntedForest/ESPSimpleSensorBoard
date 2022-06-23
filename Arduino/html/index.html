@@ -1,6 +1,6 @@
 <!--
 
-		Generated With Gulp @Wed Jun 22 2022 19:48:47 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jun 23 2022 16:20:53 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -360,6 +360,14 @@
                 <label class="control-label col-sm-2" for="outputAudioTrigger">Trigger Track</label>
                 <div class="col-sm-10"><input type="text" class="form-control" id="outputAudioTrigger" oninput=""
                         inputmode="numeric" placeholder="Leave blank to disable this option">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="outputAudioVolume">Volume</label>
+                <div class="col-sm-10"><input type="range" class="form-control" id="outputAudioVolume" min="0" max="30"
+                        value="15" oninput="outputAudioVolumeDisplay.value = outputAudioVolume.value"><output
+                        name="outputAudioVolumeDisplay" id="outputAudioVolumeDisplay">15</output>
                 </div>
             </div>
         </fieldset>

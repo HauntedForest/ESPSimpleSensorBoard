@@ -1,6 +1,6 @@
 /*
 
-		Generated With Gulp @Wed Jun 22 2022 19:48:47 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jun 23 2022 16:20:53 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -139,6 +139,7 @@ window.addEventListener('eg-setup', () => {
 window.addEventListener('eg-config-load', e => {
 
     const config = e.detail;
+    console.log('Device: Config Load', config);
 
     $('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
     $('#checkInputBeam').prop('checked', config.device.inputs.beam);
@@ -178,6 +179,17 @@ window.addEventListener('eg-config-load', e => {
         $('#deviceConfigFieldsetTriggerOtherBoard').show();
     }
 
+
+    //set audio jazz
+    if (config.device.outputs.triggerAudio.enabled) {
+        $('#deviceConfigFieldsetAudio').show();
+    }
+    $('#checkOutputPlayAudio').prop('checked', config.device.outputs.triggerAudio.enabled);
+    $('#outputAudioAmbient').val(config.device.outputs.triggerAudio.ambient);
+    $('#outputAudioTrigger').val(config.device.outputs.triggerAudio.trigger);
+    $('#outputAudioVolume').val(config.device.outputs.triggerAudio.volume);
+    $('#outputAudioVolumeDisplay').val(config.device.outputs.triggerAudio.volume); //need to set the display number
+
 }, false);
 
 
@@ -212,7 +224,8 @@ window.addEventListener('eg-config-save', e => {
             triggerAudio: {
                 enabled: $('#checkOutputPlayAudio').prop('checked'),
                 ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
-                trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1)
+                trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1),
+                volume: parseIntOrDefault($('#outputAudioVolume').val(), 15)
             }
         },
 
@@ -227,6 +240,8 @@ window.addEventListener('eg-config-save', e => {
     };
 
     e.detail.device = config;
+
+    console.log('Device: Config save Post', e.detail.device);
 
 }, false);
 /*End Device JS File*/
