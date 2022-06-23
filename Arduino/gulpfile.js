@@ -97,7 +97,6 @@ gulp.task('js', function () {
 		.src([
 			'html/js/jquery*.js',
 			'html/js/bootstrap.js',
-			'html/js/jqColorPicker.js',
 			'html/js/toastr.min.js',
 			'html/generated.js',
 			'html/script.js'

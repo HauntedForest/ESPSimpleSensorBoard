@@ -11,20 +11,6 @@ window.addEventListener('eg-setup', () => {
         }
     });
 
-    $('#checkInputMotionWhite').on('change', (evt) => {
-        var checked = $('#checkInputMotionBlack').prop('checked');
-        if (checked) {
-            $('#checkInputMotionBlack').prop('checked', false);
-        }
-    });
-
-    $('#checkInputMotionBlack').on('change', (evt) => {
-        var checked = $('#checkInputMotionWhite').prop('checked');
-        if (checked) {
-            $('#checkInputMotionWhite').prop('checked', false);
-        }
-    });
-
     $('#checkOutputTriggerCameraRecord').on('change', (evt) => {
         var checked = $(evt.target).prop('checked');
         if (checked) {
@@ -61,7 +47,6 @@ window.addEventListener('eg-config-load', e => {
 
     const config = e.detail;
 
-    $('#checkInputMotionWhite').prop('checked', config.device.inputs.motionWhite);
     $('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
     $('#checkInputBeam').prop('checked', config.device.inputs.beam);
     $('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
@@ -107,7 +92,6 @@ window.addEventListener('eg-config-save', e => {
 
     var config = {
         inputs: {
-            motionWhite: $('#checkInputMotionWhite').prop('checked'),
             motionBlack: $('#checkInputMotionBlack').prop('checked'),
             beam: $('#checkInputBeam').prop('checked'),
             http: $('#checkInputHTTPRequests').prop('checked'),

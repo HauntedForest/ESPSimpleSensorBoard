@@ -12,9 +12,8 @@
 	},
 
 	"device": {
-		"id": "NoName",
+		"id": "New v1.2",
 		"inputs": {
-			"motionWhite": false,
 			"motionBlack": false,
 			"beam": false,
 			"http": true,

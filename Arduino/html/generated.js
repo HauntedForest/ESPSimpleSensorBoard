@@ -1,6 +1,6 @@
 /*
 
-		Generated With Gulp @Tue Jun 21 2022 15:29:37 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Wed Jun 22 2022 19:48:47 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -104,20 +104,6 @@ window.addEventListener('eg-setup', () => {
         }
     });
 
-    $('#checkInputMotionWhite').on('change', (evt) => {
-        var checked = $('#checkInputMotionBlack').prop('checked');
-        if (checked) {
-            $('#checkInputMotionBlack').prop('checked', false);
-        }
-    });
-
-    $('#checkInputMotionBlack').on('change', (evt) => {
-        var checked = $('#checkInputMotionWhite').prop('checked');
-        if (checked) {
-            $('#checkInputMotionWhite').prop('checked', false);
-        }
-    });
-
     $('#checkOutputTriggerCameraRecord').on('change', (evt) => {
         var checked = $(evt.target).prop('checked');
         if (checked) {
@@ -154,7 +140,6 @@ window.addEventListener('eg-config-load', e => {
 
     const config = e.detail;
 
-    $('#checkInputMotionWhite').prop('checked', config.device.inputs.motionWhite);
     $('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
     $('#checkInputBeam').prop('checked', config.device.inputs.beam);
     $('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
@@ -200,7 +185,6 @@ window.addEventListener('eg-config-save', e => {
 
     var config = {
         inputs: {
-            motionWhite: $('#checkInputMotionWhite').prop('checked'),
             motionBlack: $('#checkInputMotionBlack').prop('checked'),
             beam: $('#checkInputBeam').prop('checked'),
             http: $('#checkInputHTTPRequests').prop('checked'),
@@ -275,6 +259,44 @@ window.addEventListener('eg-config-save', e => {
     e.detail.test = config;
 
 }, false);
+
+
+function test_playTestSound() {
+    const sound = parseInt($("#soundId").val());
+    if (isNaN(sound) || sound > 255 || sound < 1) {
+        toastr.warning('Please enter a valid sound ID between 1-255', 'Error');
+        return;
+    }
+
+    sendPostRequest('/test/sound',
+        //data
+        { soundId: sound },
+        //success
+        (responseText) => {
+            toastr.success('Successfully sent a sound test request.', 'Success');
+        },
+        //fail
+        (statusCode, statusMessage, responseText) => {
+            toastr.error('Failed to send a sound test request: ' + responseText + ' Error code: ' + statusCode + ' - ' + statusMessage, 'Error');
+        });
+
+    console.log("SoundId", sound)
+}
+
+function test_sendTestTriggerRequest() {
+    sendPostRequest('/test/trigger',
+        null,
+        //success
+        (responseText) => {
+            toastr.success('Successfully triggered the board', 'Success');
+        },
+        //fail
+        (statusCode, statusMessage, responseText) => {
+            toastr.error('Failed to trigger the board: ' + responseText + ' Error code: ' + statusCode + ' - ' + statusMessage, 'Error');
+        });
+}
+
+
 /*End Test JS File*/
 /*Admin JS File*/
 window.addEventListener('eg-setup', () => {

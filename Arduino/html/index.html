@@ -1,6 +1,6 @@
 <!--
 
-		Generated With Gulp @Tue Jun 21 2022 15:29:36 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Wed Jun 22 2022 19:48:47 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -181,11 +181,7 @@
 
             <div class="form-group">
                 <div class="col-sm-10">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="checkInputMotionWhite">
-                        <label class="custom-control-label" for="checkInputMotionWhite">Motion Sensor
-                            (White)</label>
-                    </div>
+
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="checkInputMotionBlack">
                         <label class="custom-control-label" for="checkInputMotionBlack">Motion Sensor
@@ -407,13 +403,13 @@
             <!-- <label class="control-label col-sm-2" for="soundId">Sound ID</label> -->
             <div class="col-sm-2"><input type="number" class="form-control" id="soundId" name="soundId"
                     title="Plain text ID of the sound" min="2" max="255"></div>
-            <button type="button" onclick="playTestSound()" class="btn btn-primary">Test Sound</button>
+            <button type="button" onclick="test_playTestSound()" class="btn btn-primary">Test Sound</button>
         </div>
 
         <legend class="esps-legend">Board Utilities</legend>
 
         <div class="form-group">
-            <button type="button" onclick="sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
+            <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
         </div>
 
     </fieldset>
@@ -525,7 +521,6 @@
 
 <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
 <script type="text/javascript" src="js/bootstrap.js"></script>
-<script type="text/javascript" src="js/jqColorPicker.js"></script>
 <script type="text/javascript" src="js/toastr.min.js"></script>
 <script type="text/javascript" src="generated.js"></script>
 <script type="text/javascript" src="script.js"></script>

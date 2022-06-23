@@ -1,8 +1,10 @@
+#include <Arduino.h>
 #include "Framework.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #include "AsyncHttpClient.h"
-#include "SerialMP3Player.h"
+// #include "SerialMP3Player.h"
+#include "DYPlayerArduino.h"
 #include "AsyncJson.h"
 
 // OLED display width, in pixels
@@ -15,17 +17,18 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 const int forceAccessPointPin = D5; // Connect to ground to force access point.
-#define RELAY_PIN D6
+#define RELAY_PIN_1 D1
+#define RELAY_PIN_2 D6
+#define RELAY_PIN_3 D7
+#define RELAY_PIN_4 D8
 
-// white 4 pin PIR sensor
-#define PIR_WHITE_TRIGGER_PIN D1
-#define BEAM_TRIGGER_PIN D7
+// beam sensor
+#define BEAM_TRIGGER_PIN D4
 // 3 pin PIR with board modification
 #define PIR_BLACK_TRIGGER_PIN D0
 
 String deviceName = "Default";
 
-bool deviceInputsMotionWhite = false;
 bool deviceInputsMotionBlack = false;
 bool deviceInputsBeam = false;
 bool deviceInputsHTTP = true;
@@ -71,17 +74,18 @@ AsyncHttpClient asyncHTTPClient;
 
 // Audio
 #define SOUND_FINISH_BOOTING 1
-SerialMP3Player mp3;
+// SerialMP3Player mp3;
+DY::Player mp3player(&Serial);
 
 void led_on_request(AsyncWebServerRequest *request)
 {
-	digitalWrite(RELAY_PIN, LOW);
+	digitalWrite(RELAY_PIN_1, LOW);
 	request->send(200, "text/plain", "Relay is ON!");
 }
 
 void led_off_request(AsyncWebServerRequest *request)
 {
-	digitalWrite(RELAY_PIN, HIGH);
+	digitalWrite(RELAY_PIN_1, HIGH);
 	request->send(200, "text/plain", "Relay is OFF!");
 }
 
@@ -205,18 +209,29 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 	// JsonObject &json = jsonRaw.as<JsonObject>();
 	uint8_t soundId = jsonRaw["soundId"].as<uint8_t>();
 
-	mp3.play(soundId);
+	// mp3.play(soundId);
+	mp3player.playSpecified(soundId);
 
 	request->send(200, "text/html", "Success");
 }
 
 void setup()
 {
-	pinMode(forceAccessPointPin, INPUT_PULLUP);
-	pinMode(RELAY_PIN, OUTPUT);
-	digitalWrite(RELAY_PIN, LOW);
 
-	pinMode(PIR_WHITE_TRIGGER_PIN, INPUT_PULLUP);
+	pinMode(forceAccessPointPin, INPUT_PULLUP);
+
+	pinMode(RELAY_PIN_1, OUTPUT);
+	digitalWrite(RELAY_PIN_1, LOW);
+
+	pinMode(RELAY_PIN_2, OUTPUT);
+	digitalWrite(RELAY_PIN_2, LOW);
+
+	pinMode(RELAY_PIN_3, OUTPUT);
+	digitalWrite(RELAY_PIN_3, LOW);
+
+	pinMode(RELAY_PIN_4, OUTPUT);
+	digitalWrite(RELAY_PIN_4, LOW);
+
 	pinMode(PIR_BLACK_TRIGGER_PIN, INPUT);
 	pinMode(BEAM_TRIGGER_PIN, INPUT_PULLUP);
 
@@ -259,18 +274,25 @@ void setup()
 	}
 
 	// Uses normal Serial
-	mp3.begin(9600);
-	delay(800); // wait for chip to turn on
+	// mp3.begin(9600);
+	mp3player.begin();
+	delay(800);
+	mp3player.setVolume(15); // 50% volume
 
-	mp3.sendCommand(CMD_SEL_DEV, 0, 2); // select sd-card
-	delay(800);							// wait for chip to select the SD card
+	Serial.begin(9600);
 
-	mp3.play(SOUND_FINISH_BOOTING);
+	//  mp3.sendCommand(CMD_SEL_DEV, 0, 2); // select sd-card
+	delay(800); // wait for chip to select the SD card
+
+	// mp3.play(SOUND_FINISH_BOOTING);
+	mp3player.playSpecified(SOUND_FINISH_BOOTING);
 
 	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 	{
 		delay(1000);
-		mp3.playSL(deviceOutputsPlayAudio_ambient);
+		// mp3.playSL(deviceOutputsPlayAudio_ambient);
+		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
+		mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 	}
 }
 
@@ -339,7 +361,6 @@ void saveState(const JsonObject &json)
 {
 	JsonObject device = json.createNestedObject("device");
 	device["id"] = deviceName.c_str();
-	device["inputs"]["motionWhite"] = deviceInputsMotionWhite;
 	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
 	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
@@ -375,7 +396,6 @@ void loadState(const JsonObject &json)
 		deviceName = json["device"]["id"].as<String>();
 		if (json["device"].containsKey("inputs"))
 		{
-			deviceInputsMotionWhite = json["device"]["inputs"]["motionWhite"].as<bool>();
 			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as<bool>();
 			deviceInputsBeam = json["device"]["inputs"]["beam"].as<bool>();
 			deviceInputsHTTP = json["device"]["inputs"]["http"].as<bool>();
@@ -423,11 +443,6 @@ void checkForTrigger()
 			activate = true;
 		}
 
-		if (deviceInputsMotionWhite && digitalRead(PIR_WHITE_TRIGGER_PIN) == LOW)
-		{
-			activate = true;
-		}
-
 		if (deviceInputsMotionBlack && digitalRead(PIR_BLACK_TRIGGER_PIN) == HIGH)
 		{
 			activate = true;
@@ -462,7 +477,9 @@ void checkForTrigger()
 
 		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
 		{
-			mp3.play(deviceOutputsPlayAudio_trigger);
+			// mp3.play(deviceOutputsPlayAudio_trigger);
+			mp3player.setCycleMode(DY::PlayMode::OneOff); // play sound once
+			mp3player.playSpecified(deviceOutputsPlayAudio_trigger);
 		}
 
 		if (deviceOutputsTriggerOtherBoardEnabled)
@@ -479,14 +496,14 @@ void checkForTrigger()
 		{
 			if (deviceOutputsRelayEnabled)
 			{
-				digitalWrite(RELAY_PIN, HIGH);
+				digitalWrite(RELAY_PIN_1, HIGH);
 			}
 
 			delay(deviceTimingsTimeOnMS);
 
 			if (deviceOutputsRelayEnabled)
 			{
-				digitalWrite(RELAY_PIN, LOW);
+				digitalWrite(RELAY_PIN_1, LOW);
 				delay(deviceTimingsTimeOnMS);
 			}
 		}
@@ -496,7 +513,9 @@ void checkForTrigger()
 		if (!deviceInputsAlwaysOn && deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 		{
 			delay(1020);
-			mp3.playSL(deviceOutputsPlayAudio_ambient);
+			// mp3.playSL(deviceOutputsPlayAudio_ambient);
+			mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
+			mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 		}
 	}
 }
