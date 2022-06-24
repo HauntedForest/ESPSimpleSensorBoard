@@ -14,9 +14,9 @@ window.addEventListener('eg-config-load', e => {
 
 window.addEventListener('eg-config-save', e => {
 
-    const config = {};
+    // const config = {};
 
-    e.detail.home = config;
+    // e.detail.home = config;
 
 }, false);
 /*End Home JS File*/

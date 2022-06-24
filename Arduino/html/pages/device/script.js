@@ -59,7 +59,7 @@ window.addEventListener('eg-config-load', e => {
 
     $('#checkOutputRelay').prop('checked', config.device.outputs.relay);
     $('#checkOutputTriggerOtherBoard').prop('checked', config.device.outputs.triggerOtherBoard.enabled);
-    $('#inputOutputIPAddressOfOtherBoardToTrigger').val(config.device.outputs.triggerOtherBoard.ip);
+    $('#outputTCBServerIP').val(config.device.outputs.triggerOtherBoard.ip);
 
     $('#inputStartupMS').val(config.device.timings.startupMS);
     $('#inputTimeOnMS').val(config.device.timings.timeOnMS);

@@ -1,6 +1,6 @@
 /*
 
-		Generated With Gulp @Thu Jun 23 2022 16:20:53 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jun 23 2022 18:33:46 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -24,9 +24,9 @@ window.addEventListener('eg-config-load', e => {
 
 window.addEventListener('eg-config-save', e => {
 
-    const config = {};
+    // const config = {};
 
-    e.detail.home = config;
+    // e.detail.home = config;
 
 }, false);
 /*End Home JS File*/
@@ -152,7 +152,7 @@ window.addEventListener('eg-config-load', e => {
 
     $('#checkOutputRelay').prop('checked', config.device.outputs.relay);
     $('#checkOutputTriggerOtherBoard').prop('checked', config.device.outputs.triggerOtherBoard.enabled);
-    $('#inputOutputIPAddressOfOtherBoardToTrigger').val(config.device.outputs.triggerOtherBoard.ip);
+    $('#outputTCBServerIP').val(config.device.outputs.triggerOtherBoard.ip);
 
     $('#inputStartupMS').val(config.device.timings.startupMS);
     $('#inputTimeOnMS').val(config.device.timings.timeOnMS);
@@ -256,22 +256,14 @@ window.addEventListener('eg-config-load', e => {
 
     const config = e.detail;
 
-    $('#checkOutputPlayAudio').prop('checked', config.device.outputs.triggerAudio.enabled);
-    $('#outputAudioAmbient').val(config.device.outputs.triggerAudio.ambient == -1 ? "" : config.device.outputs.triggerAudio.ambient);
-    $('#outputAudioTrigger').val(config.device.outputs.triggerAudio.trigger == -1 ? "" : config.device.outputs.triggerAudio.trigger);
-
-    if (config.device.outputs.triggerAudio.enabled) {
-        $('#deviceConfigFieldsetAudio').show();
-    }
-
 }, false);
 
 
 window.addEventListener('eg-config-save', e => {
 
-    const config = {};
+    // const config = {};
 
-    e.detail.test = config;
+    // e.detail.test = config;
 
 }, false);
 
@@ -322,16 +314,16 @@ window.addEventListener('eg-setup', () => {
 
 window.addEventListener('eg-config-load', e => {
 
-    const config = e.detail;
+    // const config = e.detail;
 
 }, false);
 
 
 window.addEventListener('eg-config-save', e => {
 
-    const config = {};
+    // const config = {};
 
-    e.detail.admin = config;
+    // e.detail.admin = config;
 
 }, false);
 /*End Admin JS File*/

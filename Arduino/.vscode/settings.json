@@ -15,7 +15,15 @@
         "bitset": "cpp",
         "xhash": "cpp",
         "xtree": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "deque": "cpp",
+        "initializer_list": "cpp",
+        "list": "cpp",
+        "regex": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp"
     }
    
 }

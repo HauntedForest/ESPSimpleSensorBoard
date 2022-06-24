@@ -287,16 +287,19 @@ void setup()
 
 	// Uses normal Serial
 	// mp3.begin(9600);
+	Serial.end();
+	delay(300);
 	mp3player.begin();
 	delay(800);
 	mp3player.setVolume(deviceOutputsPlayAudio_volume);
 
-	Serial.begin(9600);
+	// Serial.begin(9600);
 
 	//  mp3.sendCommand(CMD_SEL_DEV, 0, 2); // select sd-card
 	delay(800); // wait for chip to select the SD card
 
 	// mp3.play(SOUND_FINISH_BOOTING);
+	mp3player.setCycleMode(DY::PlayMode::OneOff);
 	mp3player.playSpecified(SOUND_FINISH_BOOTING);
 
 	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
