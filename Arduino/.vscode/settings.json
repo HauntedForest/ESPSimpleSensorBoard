@@ -24,7 +24,9 @@
         "xstring": "cpp",
         "string": "cpp",
         "unordered_map": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "system_error": "cpp",
+        "xlocmon": "cpp"
     }
    
 }

@@ -39,7 +39,6 @@ bool deviceTallyTandomSensor = false;
 bool deviceInputsAlwaysOn = false;
 
 int deviceTimingsStartupMS = 0;
-int deviceTimingsTimeOnMS = 100;
 int deviceTimingsCooldownMS = 0;
 int deviceTimingsLoopCount = 1;
 bool deviceOutputsRelayEnabled = true;
@@ -81,8 +80,10 @@ DY::Player mp3player(&Serial);
 // Upload Sequence Jazz
 byte *sequenceArray = NULL;
 byte *sequenceFileName = NULL;
-int sequenceEventMS = NULL;
-int sequenceVersionNumber = NULL;
+int sequenceEventMS = 0;
+int sequenceVersionNumber = 0;
+short sequenceNumberOfColums = 0;
+const char *SEQUENCE_FILE_NAME_SPIFFS = "sequence.bin";
 
 void led_on_request(AsyncWebServerRequest *request)
 {
@@ -256,7 +257,57 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 {
 	sequenceVersionNumber = data[0];
 
-	if (sequenceVersionNumber == 1)
+	// if (sequenceVersionNumber == 1)
+	// {
+
+	// 	byte nameArrLength = data[1];
+	// 	sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
+	// 	memcpy(sequenceFileName, data + 2, nameArrLength);
+	// 	sequenceFileName[nameArrLength] = 0;
+
+	// 	sequenceEventMS = data[2 + nameArrLength];
+
+	// 	short colLen = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
+	// 	byte rowLen = data[5 + nameArrLength];
+
+	// 	if (sequenceArray != NULL)
+	// 	{
+	// 		free(sequenceArray);
+	// 		sequenceArray = NULL;
+	// 	}
+
+	// 	sequenceArray = (byte *)malloc(colLen * rowLen);
+	// 	memcpy(sequenceArray, data + (6 + nameArrLength), colLen * rowLen);
+
+	// 	Serial.print("\nVersion Number: ");
+	// 	printHex(sequenceVersionNumber);
+
+	// 	Serial.print("\nFile Name: ");
+	// 	Serial.print(String((const char *)sequenceFileName));
+
+	// 	Serial.print("\nEvent MS: ");
+	// 	printHex(sequenceEventMS);
+
+	// 	Serial.print("\nCol Length: ");
+	// 	printHex(colLen);
+
+	// 	Serial.print("\nRow Length: ");
+	// 	printHex(rowLen);
+
+	// 	Serial.print("\nSequence:\n");
+	// 	for (uint8_t col = 0; col < colLen; col++)
+	// 	{
+	// 		for (uint8_t row = 0; row < rowLen; row++)
+	// 		{
+	// 			printHex(sequenceArray[row * colLen + col]);
+	// 		}
+
+	// 		Serial.println();
+	// 	}
+	// 	Serial.println();
+	// }
+	// else
+	if (sequenceVersionNumber == 2)
 	{
 
 		byte nameArrLength = data[1];
@@ -266,8 +317,7 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 
 		sequenceEventMS = data[2 + nameArrLength];
 
-		short colLen = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
-		byte rowLen = data[5 + nameArrLength];
+		sequenceNumberOfColums = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
 
 		if (sequenceArray != NULL)
 		{
@@ -275,8 +325,8 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 			sequenceArray = NULL;
 		}
 
-		sequenceArray = (byte *)malloc(colLen * rowLen);
-		memcpy(sequenceArray, data + (6 + nameArrLength), colLen * rowLen);
+		sequenceArray = (byte *)malloc(sequenceNumberOfColums);
+		memcpy(sequenceArray, data + (5 + nameArrLength), sequenceNumberOfColums);
 
 		Serial.print("\nVersion Number: ");
 		printHex(sequenceVersionNumber);
@@ -288,21 +338,18 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 		printHex(sequenceEventMS);
 
 		Serial.print("\nCol Length: ");
-		printHex(colLen);
+		printHex(sequenceNumberOfColums);
 
-		Serial.print("\nRow Length: ");
-		printHex(rowLen);
+		// Serial.print("\nSequence:\n");
+		// for (uint8_t col = 0; col < sequenceNumberOfColums; col++)
+		// {
+		// 	for (uint8_t row = 0; row < rowLen; row++)
+		// 	{
+		// 		printHex(sequenceArray[row * sequenceNumberOfColums + col]);
+		// 	}
 
-		Serial.print("\nSequence:\n");
-		for (uint8_t col = 0; col < colLen; col++)
-		{
-			for (uint8_t row = 0; row < rowLen; row++)
-			{
-				printHex(sequenceArray[row * colLen + col]);
-			}
-
-			Serial.println();
-		}
+		// 	Serial.println();
+		// }
 		Serial.println();
 	}
 	else
@@ -329,6 +376,11 @@ void requestSequenceUpload(AsyncWebServerRequest *request, String filename, size
 	{
 		Serial.printf("\nSequence Upload End: %s, %u B\n", filename.c_str(), index + len);
 		request->send(200, "text/html", "File upload success");
+
+		// saves the sequence file to the file system
+		File file = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "w");
+		file.write(data, len);
+		file.close();
 
 		parseAndStoreInRamSequenceBinaryFile(data, len);
 	}
@@ -395,6 +447,19 @@ void setup()
 		// webServer->on("/test/sound", HTTP_POST, requestTestSound);
 		AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/test/sound", requestTestSound);
 		webServer->addHandler(handler);
+	}
+
+	// read the sequence file to the file system
+	File file = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "r");
+
+	if (file)
+	{
+		size_t fileSize = file.size();
+		byte *tempData = (byte *)malloc(fileSize);
+		file.read(tempData, fileSize);
+		parseAndStoreInRamSequenceBinaryFile(tempData, fileSize);
+		free(tempData);
+		file.close();
 	}
 
 	// Uses normal Serial
@@ -498,7 +563,6 @@ void saveState(const JsonObject &json)
 	device["inputs"]["alwaysOn"] = deviceInputsAlwaysOn;
 
 	device["timings"]["startupMS"] = deviceTimingsStartupMS;
-	device["timings"]["timeOnMS"] = deviceTimingsTimeOnMS;
 	device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
 	device["timings"]["loopCount"] = deviceTimingsLoopCount;
 	device["outputs"]["relay"] = deviceOutputsRelayEnabled;
@@ -555,7 +619,6 @@ void loadState(const JsonObject &json)
 		if (json["device"].containsKey("timings"))
 		{
 			deviceTimingsStartupMS = json["device"]["timings"]["startupMS"].as<int>();
-			deviceTimingsTimeOnMS = json["device"]["timings"]["timeOnMS"].as<int>();
 			deviceTimingsCooldownMS = json["device"]["timings"]["cooldownMS"].as<int>();
 			deviceTimingsLoopCount = json["device"]["timings"]["loopCount"].as<int>();
 		}
@@ -627,15 +690,31 @@ void checkForTrigger()
 		{
 			if (deviceOutputsRelayEnabled)
 			{
-				digitalWrite(RELAY_PIN_1, HIGH);
-			}
+				for (short col = 0; col < sequenceNumberOfColums; col++)
+				{
+					byte value = sequenceArray[col];
+					digitalWrite(RELAY_PIN_1, (value & 0x01) ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_2, (value & 0x02) ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_3, (value & 0x04) ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_4, (value & 0x08) ? HIGH : LOW);
+					delay(sequenceEventMS);
+				}
+				// TODO: Play sequence here
+				// digitalWrite(RELAY_PIN_1, HIGH);
+				// delay(1000);
+				// digitalWrite(RELAY_PIN_1, LOW);
 
-			delay(deviceTimingsTimeOnMS);
+				// digitalWrite(RELAY_PIN_2, HIGH);
+				// delay(1000);
+				// digitalWrite(RELAY_PIN_2, LOW);
 
-			if (deviceOutputsRelayEnabled)
-			{
-				digitalWrite(RELAY_PIN_1, LOW);
-				delay(deviceTimingsTimeOnMS);
+				// digitalWrite(RELAY_PIN_3, HIGH);
+				// delay(1000);
+				// digitalWrite(RELAY_PIN_3, LOW);
+
+				// digitalWrite(RELAY_PIN_4, HIGH);
+				// delay(1000);
+				// digitalWrite(RELAY_PIN_4, LOW);
 			}
 		}
 
