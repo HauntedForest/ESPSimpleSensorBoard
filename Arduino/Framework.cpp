@@ -124,7 +124,8 @@ AsyncWebServer *framework_setup(bool forceAccessPoint)
   // digitalWrite(DATA_PIN, LOW);
 
   // Setup serial log port
-  LOG_PORT.begin(115200);
+  // LOG_PORT.begin(115200);
+  LOG_PORT.begin(9600);
   delay(10);
   LOG_PORT.println();
   LOG_PORT.println();

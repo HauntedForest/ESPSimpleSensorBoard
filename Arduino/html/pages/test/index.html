@@ -20,6 +20,20 @@
             <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
         </div>
 
+        <legend class="esps-legend">Sequence Upload Test</legend>
+
+        <form id="uploadSequence" action="/uploadSequence" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="btn btn-primary btn-file">
+                    Select Sequence File <input type="file" id="file" name="file"
+                        accept=".bin, .sequence, .propsequence" style="display: none;">
+                </label>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">Upload Sequence</button>
+            </div>
+        </form>
+
     </fieldset>
 
 </div>

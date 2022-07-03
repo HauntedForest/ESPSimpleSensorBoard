@@ -78,6 +78,12 @@ AsyncHttpClient asyncHTTPClient;
 // SerialMP3Player mp3;
 DY::Player mp3player(&Serial);
 
+// Upload Sequence Jazz
+byte *sequenceArray = NULL;
+byte *sequenceFileName = NULL;
+int sequenceEventMS = NULL;
+int sequenceVersionNumber = NULL;
+
 void led_on_request(AsyncWebServerRequest *request)
 {
 	digitalWrite(RELAY_PIN_1, LOW);
@@ -227,6 +233,107 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 	}
 }
 
+void printHex(uint8_t number)
+{
+	Serial.print("0x");
+	Serial.print(number < 16 ? "0" : "");
+	Serial.print(number, HEX);
+	Serial.print(" ");
+}
+
+/*
+0 - Version
+1 - Name String Length
+2-x - Name;
+x-3 - Event MS
+x-4 - col
+x-5 - row
+		byte[col][row]
+x-6 - Data array (col, row ordering)
+*/
+
+void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
+{
+	sequenceVersionNumber = data[0];
+
+	if (sequenceVersionNumber == 1)
+	{
+
+		byte nameArrLength = data[1];
+		sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
+		memcpy(sequenceFileName, data + 2, nameArrLength);
+		sequenceFileName[nameArrLength] = 0;
+
+		sequenceEventMS = data[2 + nameArrLength];
+
+		short colLen = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
+		byte rowLen = data[5 + nameArrLength];
+
+		if (sequenceArray != NULL)
+		{
+			free(sequenceArray);
+			sequenceArray = NULL;
+		}
+
+		sequenceArray = (byte *)malloc(colLen * rowLen);
+		memcpy(sequenceArray, data + (6 + nameArrLength), colLen * rowLen);
+
+		Serial.print("\nVersion Number: ");
+		printHex(sequenceVersionNumber);
+
+		Serial.print("\nFile Name: ");
+		Serial.print(String((const char *)sequenceFileName));
+
+		Serial.print("\nEvent MS: ");
+		printHex(sequenceEventMS);
+
+		Serial.print("\nCol Length: ");
+		printHex(colLen);
+
+		Serial.print("\nRow Length: ");
+		printHex(rowLen);
+
+		Serial.print("\nSequence:\n");
+		for (uint8_t col = 0; col < colLen; col++)
+		{
+			for (uint8_t row = 0; row < rowLen; row++)
+			{
+				printHex(sequenceArray[row * colLen + col]);
+			}
+
+			Serial.println();
+		}
+		Serial.println();
+	}
+	else
+	{
+		Serial.print("Unknown sequence version number: ");
+		Serial.println(sequenceVersionNumber);
+	}
+}
+
+void requestSequenceUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+	if (!index)
+	{
+		Serial.printf("Sequence Upload Start: %s\n", filename.c_str());
+	}
+	Serial.println("Raw Data:");
+	for (size_t i = 0; i < len; i++)
+	{
+		uint8_t n = data[i];
+		printHex(n);
+	}
+
+	if (final)
+	{
+		Serial.printf("\nSequence Upload End: %s, %u B\n", filename.c_str(), index + len);
+		request->send(200, "text/html", "File upload success");
+
+		parseAndStoreInRamSequenceBinaryFile(data, len);
+	}
+}
+
 void setup()
 {
 
@@ -279,6 +386,11 @@ void setup()
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
 
 		webServer->on("/test/trigger", HTTP_POST, requestTrigger);
+
+		// webServer->on("/uploadSequence", HTTP_POST, requestSequenceUpload);
+		webServer->on(
+			"/uploadSequence", HTTP_POST, [](AsyncWebServerRequest *request) { /*request->send(200);*/ },
+			requestSequenceUpload);
 
 		// webServer->on("/test/sound", HTTP_POST, requestTestSound);
 		AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/test/sound", requestTestSound);
