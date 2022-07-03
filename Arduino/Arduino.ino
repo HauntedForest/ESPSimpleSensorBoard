@@ -242,17 +242,6 @@ void printHex(uint8_t number)
 	Serial.print(" ");
 }
 
-/*
-0 - Version
-1 - Name String Length
-2-x - Name;
-x-3 - Event MS
-x-4 - col
-x-5 - row
-		byte[col][row]
-x-6 - Data array (col, row ordering)
-*/
-
 void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 {
 	sequenceVersionNumber = data[0];
@@ -359,30 +348,44 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 	}
 }
 
+void readSequenceFromSpiffs()
+{
+	// read the sequence file to the file system
+	File file = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "r");
+
+	if (file)
+	{
+		size_t fileSize = file.size();
+		byte *tempData = (byte *)malloc(fileSize);
+		file.read(tempData, fileSize);
+		parseAndStoreInRamSequenceBinaryFile(tempData, fileSize);
+		free(tempData);
+		file.close();
+	}
+}
+
 void requestSequenceUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 {
 	if (!index)
 	{
 		Serial.printf("Sequence Upload Start: %s\n", filename.c_str());
+		request->_tempFile = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "w");
 	}
-	Serial.println("Raw Data:");
-	for (size_t i = 0; i < len; i++)
+
+	if (len)
 	{
-		uint8_t n = data[i];
-		printHex(n);
+		request->_tempFile.write(data, len);
 	}
 
 	if (final)
 	{
+		request->_tempFile.close();
+
 		Serial.printf("\nSequence Upload End: %s, %u B\n", filename.c_str(), index + len);
+
 		request->send(200, "text/html", "File upload success");
 
-		// saves the sequence file to the file system
-		File file = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "w");
-		file.write(data, len);
-		file.close();
-
-		parseAndStoreInRamSequenceBinaryFile(data, len);
+		readSequenceFromSpiffs();
 	}
 }
 
@@ -449,18 +452,7 @@ void setup()
 		webServer->addHandler(handler);
 	}
 
-	// read the sequence file to the file system
-	File file = SPIFFS.open(SEQUENCE_FILE_NAME_SPIFFS, "r");
-
-	if (file)
-	{
-		size_t fileSize = file.size();
-		byte *tempData = (byte *)malloc(fileSize);
-		file.read(tempData, fileSize);
-		parseAndStoreInRamSequenceBinaryFile(tempData, fileSize);
-		free(tempData);
-		file.close();
-	}
+	readSequenceFromSpiffs();
 
 	// Uses normal Serial
 	// mp3.begin(9600);
