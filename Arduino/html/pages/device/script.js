@@ -1,4 +1,4 @@
-/*Home Device File*/
+/*Device File*/
 window.addEventListener('eg-setup', () => {
 
     $('#checkInputTally').on('change', (evt) => {
@@ -94,8 +94,10 @@ window.addEventListener('eg-config-load', e => {
     $('#checkOutputPlayAudio').prop('checked', config.device.outputs.triggerAudio.enabled);
     $('#outputAudioAmbient').val(config.device.outputs.triggerAudio.ambient);
     $('#outputAudioTrigger').val(config.device.outputs.triggerAudio.trigger);
-    $('#outputAudioVolume').val(config.device.outputs.triggerAudio.volume);
-    $('#outputAudioVolumeDisplay').val(config.device.outputs.triggerAudio.volume); //need to set the display number
+    $('#outputAudioVolumeAmbient').val(config.device.outputs.triggerAudio.volume.ambient);
+    $('#outputAudioVolumeAmbientDisplay').val(config.device.outputs.triggerAudio.volume.ambient); //need to set the display number
+    $('#outputAudioVolumeTrigger').val(config.device.outputs.triggerAudio.volume.trigger);
+    $('#outputAudioVolumeTriggerDisplay').val(config.device.outputs.triggerAudio.volume.trigger); //need to set the display number
 
 }, false);
 
@@ -132,7 +134,10 @@ window.addEventListener('eg-config-save', e => {
                 enabled: $('#checkOutputPlayAudio').prop('checked'),
                 ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
                 trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1),
-                volume: parseIntOrDefault($('#outputAudioVolume').val(), 15)
+                volume: {
+                    ambient: parseIntOrDefault($('#outputAudioVolumeAmbient').val(), 15),
+                    trigger: parseIntOrDefault($('#outputAudioVolumeTrigger').val(), 15)
+                }
             }
         },
 

@@ -1,6 +1,6 @@
 /*
 
-		Generated With Gulp @Sun Jul 03 2022 11:43:11 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jul 07 2022 14:05:37 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -91,7 +91,7 @@ window.addEventListener('eg-config-save', e => {
 
 }, false);
 /*End Home JS File*/
-/*Home Device File*/
+/*Device File*/
 window.addEventListener('eg-setup', () => {
 
     $('#checkInputTally').on('change', (evt) => {
@@ -187,8 +187,10 @@ window.addEventListener('eg-config-load', e => {
     $('#checkOutputPlayAudio').prop('checked', config.device.outputs.triggerAudio.enabled);
     $('#outputAudioAmbient').val(config.device.outputs.triggerAudio.ambient);
     $('#outputAudioTrigger').val(config.device.outputs.triggerAudio.trigger);
-    $('#outputAudioVolume').val(config.device.outputs.triggerAudio.volume);
-    $('#outputAudioVolumeDisplay').val(config.device.outputs.triggerAudio.volume); //need to set the display number
+    $('#outputAudioVolumeAmbient').val(config.device.outputs.triggerAudio.volume.ambient);
+    $('#outputAudioVolumeAmbientDisplay').val(config.device.outputs.triggerAudio.volume.ambient); //need to set the display number
+    $('#outputAudioVolumeTrigger').val(config.device.outputs.triggerAudio.volume.trigger);
+    $('#outputAudioVolumeTriggerDisplay').val(config.device.outputs.triggerAudio.volume.trigger); //need to set the display number
 
 }, false);
 
@@ -225,7 +227,10 @@ window.addEventListener('eg-config-save', e => {
                 enabled: $('#checkOutputPlayAudio').prop('checked'),
                 ambient: parseIntOrDefault($('#outputAudioAmbient').val(), -1),
                 trigger: parseIntOrDefault($('#outputAudioTrigger').val(), -1),
-                volume: parseIntOrDefault($('#outputAudioVolume').val(), 15)
+                volume: {
+                    ambient: parseIntOrDefault($('#outputAudioVolumeAmbient').val(), 15),
+                    trigger: parseIntOrDefault($('#outputAudioVolumeTrigger').val(), 15)
+                }
             }
         },
 

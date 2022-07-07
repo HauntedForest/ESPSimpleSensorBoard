@@ -41,7 +41,10 @@
 				"enabled": false,
 				"ambient": -1,
 				"trigger": -1,
-				"volume": 15
+				"volume": {
+					"ambient": 15,
+					"trigger": 15
+				}
 			}
 		},
 		"timings": {

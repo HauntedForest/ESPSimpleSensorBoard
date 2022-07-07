@@ -54,7 +54,8 @@ int deviceOutputsTriggerCamera_sec = 0;
 bool deviceOutputsPlayAudio_enabled = false;
 uint16_t deviceOutputsPlayAudio_ambient = -1;
 uint16_t deviceOutputsPlayAudio_trigger = -1;
-uint16_t deviceOutputsPlayAudio_volume = 15; // 0-30. 15 = 50%
+uint16_t deviceOutputsPlayAudio_volumeAmbient = 15; // 0-30. 15 = 50%
+uint16_t deviceOutputsPlayAudio_volumeTrigger = 15; // 0-30. 15 = 50%
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -218,7 +219,7 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 	uint8_t soundId = jsonRaw["soundId"].as<uint8_t>();
 
 	// mp3.play(soundId);
-	mp3player.setVolume(deviceOutputsPlayAudio_volume);
+	mp3player.setVolume(deviceOutputsPlayAudio_volumeTrigger);
 	mp3player.setCycleMode(DY::PlayMode::OneOff);
 	mp3player.playSpecified(soundId);
 
@@ -460,7 +461,6 @@ void setup()
 	delay(300);
 	mp3player.begin();
 	delay(800);
-	mp3player.setVolume(deviceOutputsPlayAudio_volume);
 
 	// Serial.begin(9600);
 
@@ -475,7 +475,7 @@ void setup()
 	{
 		delay(1000);
 		// mp3.playSL(deviceOutputsPlayAudio_ambient);
-		mp3player.setVolume(deviceOutputsPlayAudio_volume);
+		mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
 		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 		mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 	}
@@ -570,7 +570,8 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerAudio"]["enabled"] = deviceOutputsPlayAudio_enabled;
 	device["outputs"]["triggerAudio"]["ambient"] = deviceOutputsPlayAudio_ambient;
 	device["outputs"]["triggerAudio"]["trigger"] = deviceOutputsPlayAudio_trigger;
-	device["outputs"]["triggerAudio"]["volume"] = deviceOutputsPlayAudio_volume;
+	device["outputs"]["triggerAudio"]["volume"]["ambient"] = deviceOutputsPlayAudio_volumeAmbient;
+	device["outputs"]["triggerAudio"]["volume"]["trigger"] = deviceOutputsPlayAudio_volumeTrigger;
 }
 
 void loadState(const JsonObject &json)
@@ -605,7 +606,27 @@ void loadState(const JsonObject &json)
 			deviceOutputsPlayAudio_enabled = json["device"]["outputs"]["triggerAudio"]["enabled"].as<bool>();
 			deviceOutputsPlayAudio_ambient = json["device"]["outputs"]["triggerAudio"]["ambient"].as<uint16_t>();
 			deviceOutputsPlayAudio_trigger = json["device"]["outputs"]["triggerAudio"]["trigger"].as<uint16_t>();
-			deviceOutputsPlayAudio_volume = json["device"]["outputs"]["triggerAudio"]["volume"].as<uint16_t>();
+			deviceOutputsPlayAudio_volumeAmbient = json["device"]["outputs"]["triggerAudio"]["volume"]["ambient"].as<uint16_t>();
+			deviceOutputsPlayAudio_volumeTrigger = json["device"]["outputs"]["triggerAudio"]["volume"]["trigger"].as<uint16_t>();
+
+			// Update the sound in real time IF we are playing a Ambient sound
+			mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
+
+			// IF we are playing a Ambient sound, restart playing that when we load. This way its in real time.
+			if (!deviceInputsAlwaysOn && deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
+			{
+				delay(1020);
+				// mp3.playSL(deviceOutputsPlayAudio_ambient);
+				mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
+				mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
+				mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
+			}
+
+			// Kill the Ambient sound if its set to 0, but audio is enabled.
+			else if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient == 0)
+			{
+				mp3player.stop();
+			}
 		}
 
 		if (json["device"].containsKey("timings"))
@@ -663,7 +684,7 @@ void checkForTrigger()
 		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
 		{
 			// mp3.play(deviceOutputsPlayAudio_trigger);
-			mp3player.setVolume(deviceOutputsPlayAudio_volume);
+			mp3player.setVolume(deviceOutputsPlayAudio_volumeTrigger);
 			mp3player.setCycleMode(DY::PlayMode::OneOff); // play sound once
 			mp3player.playSpecified(deviceOutputsPlayAudio_trigger);
 		}
@@ -716,7 +737,7 @@ void checkForTrigger()
 		{
 			delay(1020);
 			// mp3.playSL(deviceOutputsPlayAudio_ambient);
-			mp3player.setVolume(deviceOutputsPlayAudio_volume);
+			mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
 			mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 			mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
 		}

@@ -1,6 +1,6 @@
 <!--
 
-		Generated With Gulp @Sun Jul 03 2022 11:43:10 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jul 07 2022 14:05:37 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -358,10 +358,20 @@
             </div>
 
             <div class="form-group">
-                <label class="control-label col-sm-2" for="outputAudioVolume">Volume</label>
-                <div class="col-sm-10"><input type="range" class="form-control" id="outputAudioVolume" min="0" max="30"
-                        value="15" oninput="outputAudioVolumeDisplay.value = outputAudioVolume.value"><output
-                        name="outputAudioVolumeDisplay" id="outputAudioVolumeDisplay">15</output>
+                <label class="control-label col-sm-2" for="outputAudioVolumeAmbient">Ambient Volume</label>
+                <div class="col-sm-10"><input type="range" class="form-control" id="outputAudioVolumeAmbient" min="0"
+                        max="30" value="15"
+                        oninput="outputAudioVolumeAmbientDisplay.value = outputAudioVolumeAmbient.value"><output
+                        name="outputAudioVolumeAmbientDisplay" id="outputAudioVolumeAmbientDisplay">15</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="outputAudioVolumeTrigger">Trigger Volume</label>
+                <div class="col-sm-10"><input type="range" class="form-control" id="outputAudioVolumeTrigger" min="0"
+                        max="30" value="15"
+                        oninput="outputAudioVolumeTriggerDisplay.value = outputAudioVolumeTrigger.value"><output
+                        name="outputAudioVolumeTriggerDisplay" id="outputAudioVolumeTriggerDisplay">15</output>
                 </div>
             </div>
         </fieldset>

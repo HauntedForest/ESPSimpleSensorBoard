@@ -155,8 +155,12 @@ gulp.task('spiffs-upload', function (cb) {
 	});
 });
 
+// Generate HTML and JS task
+gulp.task('generate', gulp.series(['generate-html', 'generate-js']));
+
 /*Spiffs - Compile and upload to device */
 gulp.task('spiffs', gulp.series(['spiffs-compile', 'spiffs-upload']));
 
 /* Default Task */
 gulp.task('default', gulp.series(['clean', 'generate-html', 'html', 'css', 'generate-js', 'js', 'image', 'spiffs']));
+
