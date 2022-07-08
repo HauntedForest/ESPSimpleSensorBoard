@@ -12,7 +12,6 @@
 	},
 
 	"device": {
-		"id": "New v1.2",
 		"inputs": {
 			"motionBlack": false,
 			"beam": false,
@@ -52,5 +51,9 @@
 			"cooldownMS": 0,
 			"loopCount": 1
 		}
+	},
+
+	"admin": {
+		"id": "New v1.2"
 	}
 }

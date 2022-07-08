@@ -146,9 +146,7 @@ window.addEventListener('eg-config-save', e => {
             timeOnMS: parseIntOrDefault($('#inputTimeOnMS').val(), 0),
             cooldownMS: parseIntOrDefault($('#inputCooldownMS').val(), 0),
             loopCount: parseIntOrDefault($('#inputLoopCount').val(), 0)
-        },
-
-        id: $('#devid').val()
+        }
     };
 
     e.detail.device = config;

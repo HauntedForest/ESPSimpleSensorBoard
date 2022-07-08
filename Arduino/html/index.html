@@ -1,6 +1,6 @@
 <!--
 
-		Generated With Gulp @Thu Jul 07 2022 14:05:37 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jul 07 2022 14:58:22 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -42,11 +42,11 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="#home">Home</a></li>
                     <li><a href="#wifi">Wireless Setup</a></li>
-                    <li><a href="#config">Device Setup</a></li>
-                    <li><a href="#test-variables">Test Input Variables</a></li>
+                    <li><a href="#config">Inputs / Outputs</a></li>
+                    <li><a href="#test-variables">Debug & Tests</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#admin">Admin</a></li>
+                    <li><a href="#admin">Firmware</a></li>
                 </ul>
             </div>
         </div>
@@ -164,7 +164,7 @@
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save
+                    <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-success" disabled>Save
                         Changes</button>
                 </div>
             </div>
@@ -379,21 +379,10 @@
         <fieldset>
             <legend class="esps-legend">Misc</legend>
 
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="devid">Device ID</label>
-                <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid"
-                        title="Plain text ID to help identify your device."
-                        placeholder="Plain text ID to help identify your device."></div>
-            </div>
-
-
-
             <!-- Device Config Save -->
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
-                    <!-- <button type="button" onclick="testSavedConfig()" class="btn btn-warning">Test Saved
-                        Config</button> -->
                 </div>
             </div>
 
@@ -417,14 +406,16 @@
                     title="Plain text ID of the sound" min="2" max="255"></div>
             <button type="button" onclick="test_playTestSound()" class="btn btn-primary">Test Sound</button>
         </div>
-
-        <legend class="esps-legend">Board Utilities</legend>
+    </fieldset>
+    <fieldset>
+        <legend class="esps-legend">Sequence Utilities</legend>
 
         <div class="form-group">
-            <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
+            <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-warning">Trigger
+                Sequence</button>
         </div>
 
-        <legend class="esps-legend">Sequence Upload Test</legend>
+        <br><br><br>
 
         <form id="uploadSequence" action="/uploadSequence" method="post" enctype="multipart/form-data">
             <div class="form-group">
@@ -439,12 +430,19 @@
         </form>
 
     </fieldset>
+    <fieldset>
+        <legend class="esps-legend">Board Utilities</legend>
+
+        <div class="form-group">
+            <button type="button" onclick="reboot()" class="btn btn-danger">Reboot ESP</button>
+        </div>
+    </fieldset>
 
 </div>
 <!-- Administration -->
 <div id="admin" class="mdiv hidden anchor">
     <fieldset>
-        <legend class="esps-legend">Administration</legend>
+        <legend class="esps-legend">Firmware</legend>
         <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="control-label col-sm-3">FW Version</label>
@@ -485,10 +483,29 @@
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button type="button" onclick="reboot()" class="btn btn-danger">Reboot</button>
+                    <button type="button" onclick="reboot()" class="btn btn-danger">Reboot Device</button>
                 </div>
             </div>
         </form>
+    </fieldset>
+
+    <fieldset>
+        <legend class="esps-legend">Device Identification</legend>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="devid">Device ID</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid"
+                    title="Plain text ID to help identify your device."
+                    placeholder="Plain text ID to help identify your device."></div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <br>
+                <button type="button" onclick="submitConfig()" class="btn btn-success">Save Changes</button>
+            </div>
+        </div>
+
     </fieldset>
 </div>
 </div>

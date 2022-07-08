@@ -3,7 +3,6 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #include "AsyncHttpClient.h"
-// #include "SerialMP3Player.h"
 #include "DYPlayerArduino.h"
 #include "AsyncJson.h"
 
@@ -75,7 +74,7 @@ AsyncHttpClient asyncHTTPClient;
 
 // Audio
 #define SOUND_FINISH_BOOTING 1
-// SerialMP3Player mp3;
+
 DY::Player mp3player(&Serial);
 
 // Upload Sequence Jazz
@@ -85,18 +84,6 @@ int sequenceEventMS = 0;
 int sequenceVersionNumber = 0;
 short sequenceNumberOfColums = 0;
 const char *SEQUENCE_FILE_NAME_SPIFFS = "sequence.bin";
-
-void led_on_request(AsyncWebServerRequest *request)
-{
-	digitalWrite(RELAY_PIN_1, LOW);
-	request->send(200, "text/plain", "Relay is ON!");
-}
-
-void led_off_request(AsyncWebServerRequest *request)
-{
-	digitalWrite(RELAY_PIN_1, HIGH);
-	request->send(200, "text/plain", "Relay is OFF!");
-}
 
 void requestTally(AsyncWebServerRequest *request)
 {
@@ -435,8 +422,6 @@ void setup()
 	// See https://github.com/me-no-dev/ESPAsyncWebServer
 	if (webServer)
 	{
-		webServer->on("/on", HTTP_GET, led_on_request);
-		webServer->on("/off", HTTP_GET, led_off_request);
 		webServer->on("/tally", HTTP_POST, requestTally);
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
@@ -538,14 +523,62 @@ void updateStatus(const connection_status_t &connectionStatus)
 		display.setCursor(114, 0);
 		display.println(connectionStatus.signalStrength - 1); // 99 cap to not waste a character
 	}
-
+	// if (!activate)
+	// {
+	// 	drawRelays(false, false, false, false, false);
+	// }
 	display.display();
+}
+
+void drawRelays(bool clear, bool r1, bool r2, bool r3, bool r4)
+{
+	display.setCursor(100, 24); // line 4
+	if (clear)
+	{
+		display.fillRect(100, 24, 16, 4, SSD1306_BLACK);
+	}
+	if (r1)
+	{
+		display.fillRect(100, 24, 4, 4, SSD1306_WHITE);
+	}
+	else
+	{
+		display.drawRect(100, 24, 4, 4, SSD1306_WHITE);
+	}
+	if (r2)
+	{
+		display.fillRect(108, 24, 4, 4, SSD1306_WHITE);
+	}
+	else
+	{
+		display.drawRect(108, 24, 4, 4, SSD1306_WHITE);
+	}
+	if (r3)
+	{
+		display.fillRect(116, 24, 4, 4, SSD1306_WHITE);
+	}
+	else
+	{
+		display.drawRect(116, 24, 4, 4, SSD1306_WHITE);
+	}
+	if (r4)
+	{
+		display.fillRect(124, 24, 4, 4, SSD1306_WHITE);
+	}
+	else
+	{
+		display.drawRect(124, 24, 4, 4, SSD1306_WHITE);
+	}
+
+	if (clear)
+	{
+		display.display();
+	}
 }
 
 void saveState(const JsonObject &json)
 {
 	JsonObject device = json.createNestedObject("device");
-	device["id"] = deviceName.c_str();
 	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
 	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
@@ -572,14 +605,23 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerAudio"]["trigger"] = deviceOutputsPlayAudio_trigger;
 	device["outputs"]["triggerAudio"]["volume"]["ambient"] = deviceOutputsPlayAudio_volumeAmbient;
 	device["outputs"]["triggerAudio"]["volume"]["trigger"] = deviceOutputsPlayAudio_volumeTrigger;
+
+	JsonObject admin = json.createNestedObject("admin");
+	admin["id"] = deviceName.c_str();
 }
 
 void loadState(const JsonObject &json)
 {
+
+	if (json.containsKey("admin"))
+	{
+		deviceName = json["admin"]["id"].as<String>();
+	}
+
 	if (json.containsKey("device"))
 	{
 		// const JsonObject device = json["device"].as<JsonObject>();
-		deviceName = json["device"]["id"].as<String>();
+
 		if (json["device"].containsKey("inputs"))
 		{
 			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as<bool>();
@@ -615,8 +657,6 @@ void loadState(const JsonObject &json)
 			// IF we are playing a Ambient sound, restart playing that when we load. This way its in real time.
 			if (!deviceInputsAlwaysOn && deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 			{
-				delay(1020);
-				// mp3.playSL(deviceOutputsPlayAudio_ambient);
 				mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
 				mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 				mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
@@ -706,28 +746,17 @@ void checkForTrigger()
 				for (short col = 0; col < sequenceNumberOfColums; col++)
 				{
 					byte value = sequenceArray[col];
-					digitalWrite(RELAY_PIN_1, (value & 0x01) ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_2, (value & 0x02) ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_3, (value & 0x04) ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_4, (value & 0x08) ? HIGH : LOW);
+					bool r1 = (value & 0x01) != 0;
+					bool r2 = (value & 0x02) != 0;
+					bool r3 = (value & 0x04) != 0;
+					bool r4 = (value & 0x08) != 0;
+					digitalWrite(RELAY_PIN_1, r1 ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_2, r2 ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_3, r3 ? HIGH : LOW);
+					digitalWrite(RELAY_PIN_4, r4 ? HIGH : LOW);
+					// drawRelays(true, r1, r2, r3, r4);
 					delay(sequenceEventMS);
 				}
-				// TODO: Play sequence here
-				// digitalWrite(RELAY_PIN_1, HIGH);
-				// delay(1000);
-				// digitalWrite(RELAY_PIN_1, LOW);
-
-				// digitalWrite(RELAY_PIN_2, HIGH);
-				// delay(1000);
-				// digitalWrite(RELAY_PIN_2, LOW);
-
-				// digitalWrite(RELAY_PIN_3, HIGH);
-				// delay(1000);
-				// digitalWrite(RELAY_PIN_3, LOW);
-
-				// digitalWrite(RELAY_PIN_4, HIGH);
-				// delay(1000);
-				// digitalWrite(RELAY_PIN_4, LOW);
 			}
 		}
 

@@ -1,6 +1,6 @@
 /*
 
-		Generated With Gulp @Thu Jul 07 2022 14:05:37 GMT-0700 (Pacific Daylight Time)
+		Generated With Gulp @Thu Jul 07 2022 14:58:23 GMT-0700 (Pacific Daylight Time)
 
 		*** DO NOT MANUALLY EDIT THIS FILE ***
 
@@ -239,9 +239,7 @@ window.addEventListener('eg-config-save', e => {
             timeOnMS: parseIntOrDefault($('#inputTimeOnMS').val(), 0),
             cooldownMS: parseIntOrDefault($('#inputCooldownMS').val(), 0),
             loopCount: parseIntOrDefault($('#inputLoopCount').val(), 0)
-        },
-
-        id: $('#devid').val()
+        }
     };
 
     e.detail.device = config;
@@ -319,16 +317,22 @@ window.addEventListener('eg-setup', () => {
 
 window.addEventListener('eg-config-load', e => {
 
-    // const config = e.detail;
+    const config = e.detail;
+
+    $('#title').text('ESP - ' + config.admin.id);
+    $('#name').text(config.admin.id);
+    $('#devid').val(config.admin.id);
 
 }, false);
 
 
 window.addEventListener('eg-config-save', e => {
 
-    // const config = {};
+    const config = {
+        id: $('#devid').val()
+    };
 
-    // e.detail.admin = config;
+    e.detail.admin = config;
 
 }, false);
-/*End Admin JS File*/
+/*End Admin JS File*/ 

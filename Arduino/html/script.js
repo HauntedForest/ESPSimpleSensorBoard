@@ -328,10 +328,6 @@ function getConfig(data) {
 
 	// devices
 
-	$('#title').text('ESP - ' + config.device.id);
-	$('#name').text(config.device.id);
-	$('#devid').val(config.device.id);
-
 }
 
 function getConfigStatus(data) {

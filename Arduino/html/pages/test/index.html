@@ -13,14 +13,16 @@
                     title="Plain text ID of the sound" min="2" max="255"></div>
             <button type="button" onclick="test_playTestSound()" class="btn btn-primary">Test Sound</button>
         </div>
-
-        <legend class="esps-legend">Board Utilities</legend>
+    </fieldset>
+    <fieldset>
+        <legend class="esps-legend">Sequence Utilities</legend>
 
         <div class="form-group">
-            <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-danger">Trigger</button>
+            <button type="button" onclick="test_sendTestTriggerRequest()" class="btn btn-warning">Trigger
+                Sequence</button>
         </div>
 
-        <legend class="esps-legend">Sequence Upload Test</legend>
+        <br><br><br>
 
         <form id="uploadSequence" action="/uploadSequence" method="post" enctype="multipart/form-data">
             <div class="form-group">
@@ -34,6 +36,13 @@
             </div>
         </form>
 
+    </fieldset>
+    <fieldset>
+        <legend class="esps-legend">Board Utilities</legend>
+
+        <div class="form-group">
+            <button type="button" onclick="reboot()" class="btn btn-danger">Reboot ESP</button>
+        </div>
     </fieldset>
 
 </div>
