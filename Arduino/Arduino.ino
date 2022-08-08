@@ -55,6 +55,7 @@ uint16_t deviceOutputsPlayAudio_ambient = -1;
 uint16_t deviceOutputsPlayAudio_trigger = -1;
 uint16_t deviceOutputsPlayAudio_volumeAmbient = 15; // 0-30. 15 = 50%
 uint16_t deviceOutputsPlayAudio_volumeTrigger = 15; // 0-30. 15 = 50%
+uint16_t deviceOutputsPlayAudio_eq = (int)DY::Eq::Normal;
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -453,7 +454,10 @@ void setup()
 	delay(800); // wait for chip to select the SD card
 
 	// mp3.play(SOUND_FINISH_BOOTING);
+	mp3player.setEq(static_cast<DY::Eq>(deviceOutputsPlayAudio_eq));
 	mp3player.setCycleMode(DY::PlayMode::OneOff);
+	// set volume for boot sound to 50%
+	mp3player.setVolume(15);
 	mp3player.playSpecified(SOUND_FINISH_BOOTING);
 
 	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
@@ -530,6 +534,7 @@ void updateStatus(const connection_status_t &connectionStatus)
 	display.display();
 }
 
+// unused, this is too slow to actually draw them to the screen for reasons i don't fully understand.
 void drawRelays(bool clear, bool r1, bool r2, bool r3, bool r4)
 {
 	display.setCursor(100, 24); // line 4
@@ -606,6 +611,8 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerAudio"]["volume"]["ambient"] = deviceOutputsPlayAudio_volumeAmbient;
 	device["outputs"]["triggerAudio"]["volume"]["trigger"] = deviceOutputsPlayAudio_volumeTrigger;
 
+	device["outputs"]["triggerAudio"]["eq"] = deviceOutputsPlayAudio_eq;
+
 	JsonObject admin = json.createNestedObject("admin");
 	admin["id"] = deviceName.c_str();
 }
@@ -650,6 +657,10 @@ void loadState(const JsonObject &json)
 			deviceOutputsPlayAudio_trigger = json["device"]["outputs"]["triggerAudio"]["trigger"].as<uint16_t>();
 			deviceOutputsPlayAudio_volumeAmbient = json["device"]["outputs"]["triggerAudio"]["volume"]["ambient"].as<uint16_t>();
 			deviceOutputsPlayAudio_volumeTrigger = json["device"]["outputs"]["triggerAudio"]["volume"]["trigger"].as<uint16_t>();
+			deviceOutputsPlayAudio_eq = json["device"]["outputs"]["triggerAudio"]["eq"].as<uint16_t>();
+
+			// Set the EQ
+			mp3player.setEq(static_cast<DY::Eq>(deviceOutputsPlayAudio_eq));
 
 			// Update the sound in real time IF we are playing a Ambient sound
 			mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);

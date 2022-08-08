@@ -41,6 +41,29 @@ window.addEventListener('eg-setup', () => {
         }
     });
 
+    document.getElementById("uploadSequence").addEventListener('submit', (e) => {
+        console.log('CUSTOM METHOD')
+        // Store reference to form to make later code easier to read
+        const form = e.target;
+
+        // Post data using the Fetch API
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not OK');
+            }
+            toastr.success('Successfully uploaded sequence', 'Success!');
+        }).catch(error => {
+            toastr.error('There has been a problem with your fetch operation: ' + error, 'Error submitting sequence');
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+
+        // Prevent the default form submit
+        e.preventDefault();
+    });
+
 }, false);
 
 window.addEventListener('eg-config-load', e => {
@@ -98,6 +121,7 @@ window.addEventListener('eg-config-load', e => {
     $('#outputAudioVolumeAmbientDisplay').val(config.device.outputs.triggerAudio.volume.ambient); //need to set the display number
     $('#outputAudioVolumeTrigger').val(config.device.outputs.triggerAudio.volume.trigger);
     $('#outputAudioVolumeTriggerDisplay').val(config.device.outputs.triggerAudio.volume.trigger); //need to set the display number
+    $('#outputAudioEQ').val(config.device.outputs.triggerAudio.eq);
 
 }, false);
 
@@ -137,7 +161,8 @@ window.addEventListener('eg-config-save', e => {
                 volume: {
                     ambient: parseIntOrDefault($('#outputAudioVolumeAmbient').val(), 15),
                     trigger: parseIntOrDefault($('#outputAudioVolumeTrigger').val(), 15)
-                }
+                },
+                eq: parseIntOrDefault($('#outputAudioEQ').val(), 0)
             }
         },
 

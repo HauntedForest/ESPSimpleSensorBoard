@@ -43,7 +43,8 @@
 				"volume": {
 					"ambient": 15,
 					"trigger": 15
-				}
+				},
+				"eq": 0
 			}
 		},
 		"timings": {
