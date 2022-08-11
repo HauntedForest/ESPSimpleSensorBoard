@@ -15,10 +15,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const int forceAccessPointPin = D5; // Connect to ground to force access point.
 #define RELAY_PIN D6
 
-//white 4 pin PIR sensor
+// white 4 pin PIR sensor
 #define PIR_WHITE_TRIGGER_PIN D1
 #define BEAM_TRIGGER_PIN D7
-//3 pin PIR with board modification
+// 3 pin PIR with board modification
 #define PIR_BLACK_TRIGGER_PIN D0
 
 String deviceName = "Default";
@@ -40,9 +40,7 @@ String deviceOutputsTriggerOtherBoardIP = "";
 
 bool deviceOutputsTriggerCamera_enabled = false;
 String deviceOutputsTriggerCamera_serverIP = "";
-bool deviceOutputsTriggerCamera_camera = "";
-int deviceOutputsTriggerCamera_min = 0;
-int deviceOutputsTriggerCamera_sec = 0;
+String deviceOutputsTriggerCamera_camera = "";
 
 const String TALLY_PROGRAM = "program";
 const String TALLY_PREVIEW = "preview";
@@ -57,7 +55,7 @@ bool startupRequestAP = false;
 
 bool activate = false;
 
-//send async http requests to other devices as a option output
+// send async http requests to other devices as a option output
 AsyncHttpClient asyncHTTPClient;
 
 void led_on_request(AsyncWebServerRequest *request)
@@ -128,22 +126,22 @@ void requestTally(AsyncWebServerRequest *request)
 		return;
 	}
 
-	//preview
+	// preview
 	if (!temp_tally_program && temp_tally_preview)
 	{
 		currentTallyState = TALLY_PREVIEW;
 	}
-	//program
+	// program
 	else if (temp_tally_program && !temp_tally_preview)
 	{
 		currentTallyState = TALLY_PROGRAM;
 	}
-	//preview & program = program
+	// preview & program = program
 	else if (temp_tally_preview && temp_tally_program)
 	{
 		currentTallyState = TALLY_PROGRAM;
 	}
-	//Not in a state
+	// Not in a state
 	else if (!temp_tally_preview && !temp_tally_program)
 	{
 		currentTallyState = TALLY_NONE;
@@ -202,7 +200,7 @@ void setup()
 	Wire.setClock(400000L);					   // set I2C clock to 400kHz
 	display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 128x32)
 
-	//disable screen wrapping
+	// disable screen wrapping
 	display.setTextWrap(false);
 
 	// Show initial message on the screen
@@ -227,6 +225,21 @@ void setup()
 		webServer->on("/tally", HTTP_POST, requestTally);
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
+	}
+
+	/*
+	Wifi needs to be initalized
+	Make sure you are actually on wifi and not AP hotspot mode
+	*/
+	if (deviceOutputsTriggerCamera_enabled)
+	{
+		String temp = "http://";
+		temp += deviceOutputsTriggerCamera_serverIP;
+		temp += "/postEvent";
+		String data = "{\"location\": \"" + deviceOutputsTriggerCamera_camera + "\", \"eventType\": \"Sensor Board Turned On\"}";
+
+		asyncHTTPClient.init("POST", temp, "application/json", data);
+		asyncHTTPClient.send(true);
 	}
 }
 
@@ -266,7 +279,7 @@ void updateStatus(const connection_status_t &connectionStatus)
 
 	if (connectionStatus.status != CONNSTAT_NONE)
 	{
-		//display.print("SSID: ");
+		// display.print("SSID: ");
 		display.println(connectionStatus.ssid);
 	}
 
@@ -285,7 +298,7 @@ void updateStatus(const connection_status_t &connectionStatus)
 	if (connectionStatus.status == CONNSTAT_CONNECTED)
 	{
 		display.setCursor(114, 0);
-		display.println(connectionStatus.signalStrength - 1); //99 cap to not waste a character
+		display.println(connectionStatus.signalStrength - 1); // 99 cap to not waste a character
 	}
 
 	display.display();
@@ -313,15 +326,13 @@ void saveState(const JsonObject &json)
 	device["outputs"]["triggerCameraRecord"]["enabled"] = deviceOutputsTriggerCamera_enabled;
 	device["outputs"]["triggerCameraRecord"]["serverIP"] = deviceOutputsTriggerCamera_serverIP;
 	device["outputs"]["triggerCameraRecord"]["camera"] = deviceOutputsTriggerCamera_camera;
-	device["outputs"]["triggerCameraRecord"]["seconds"] = deviceOutputsTriggerCamera_sec;
-	device["outputs"]["triggerCameraRecord"]["minutes"] = deviceOutputsTriggerCamera_min;
 }
 
 void loadState(const JsonObject &json)
 {
 	if (json.containsKey("device"))
 	{
-		//const JsonObject device = json["device"].as<JsonObject>();
+		// const JsonObject device = json["device"].as<JsonObject>();
 		deviceName = json["device"]["id"].as<String>();
 		if (json["device"].containsKey("inputs"))
 		{
@@ -343,8 +354,6 @@ void loadState(const JsonObject &json)
 			deviceOutputsTriggerCamera_enabled = json["device"]["outputs"]["triggerCameraRecord"]["enabled"].as<bool>();
 			deviceOutputsTriggerCamera_serverIP = json["device"]["outputs"]["triggerCameraRecord"]["serverIP"].as<String>();
 			deviceOutputsTriggerCamera_camera = json["device"]["outputs"]["triggerCameraRecord"]["camera"].as<String>();
-			deviceOutputsTriggerCamera_sec = json["device"]["outputs"]["triggerCameraRecord"]["seconds"].as<int>();
-			deviceOutputsTriggerCamera_min = json["device"]["outputs"]["triggerCameraRecord"]["minutes"].as<int>();
 		}
 
 		if (json["device"].containsKey("timings"))
@@ -360,7 +369,7 @@ void loadState(const JsonObject &json)
 void checkForTrigger()
 {
 
-	//if tally is disabled, or its enabled in tandom mode
+	// if tally is disabled, or its enabled in tandom mode
 	if (!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_PROGRAM))
 	{
 		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW)
@@ -383,18 +392,16 @@ void checkForTrigger()
 	{
 		activate = false;
 
-		//trigger camera record
+		// trigger camera record
 		if (deviceOutputsTriggerCamera_enabled)
 		{
 			String temp = "http://";
 			temp += deviceOutputsTriggerCamera_serverIP;
-			temp += "/trigger";
-			temp += "?location=" + deviceOutputsTriggerCamera_camera;
-			temp += "&minutes=" + deviceOutputsTriggerCamera_min;
-			temp += "&seconds=" + deviceOutputsTriggerCamera_sec;
+			temp += "/postEvent";
+			String data = "{\"location\": \"" + deviceOutputsTriggerCamera_camera + "\", \"eventType\": \"Sensor Triggered\"}";
 
-			//POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
-			asyncHTTPClient.init("POST", temp.c_str());
+			// POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
+			asyncHTTPClient.init("POST", temp.c_str(), "application/json", data);
 			asyncHTTPClient.send(true);
 		}
 
@@ -402,7 +409,7 @@ void checkForTrigger()
 
 		if (deviceOutputsTriggerOtherBoardEnabled)
 		{
-			//POST http://IP:80/trigger
+			// POST http://IP:80/trigger
 			String temp = "http://";
 			temp += deviceOutputsTriggerOtherBoardIP;
 			temp += "/trigger";

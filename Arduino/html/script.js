@@ -134,20 +134,14 @@ $(function () {
 		var checked = $(evt.target).prop('checked');
 		if (checked) {
 			$('#dropdownCameraLocation').show();
-			$('#inputCameraSeconds').show();
-			$('#inputCameraSecondsLabel').show();
-			$('#inputCameraMinutes').show();
-			$('#inputCameraMinutesLabel').show();
-			$('#imputCameraServerIP').show();
-			$('#imputCameraServerIPLabel').show();
+			$('#dropdownCameraLocationLabel').show();
+			$('#inputCameraServerIP').show();
+			$('#inputCameraServerIPLabel').show();
 		} else {
+			$('#dropdownCameraLocationLabel').hide();
 			$('#dropdownCameraLocation').hide();
-			$('#inputCameraSeconds').hide();
-			$('#inputCameraSecondsLabel').hide();
-			$('#inputCameraMinutes').hide();
-			$('#inputCameraMinutesLabel').hide();
-			$('#imputCameraServerIP').hide();
-			$('#imputCameraServerIPLabel').hide();
+			$('#inputCameraServerIP').hide();
+			$('#inputCameraServerIPLabel').hide();
 		}
 	});
 
@@ -403,20 +397,29 @@ function getConfig(data) {
 
 	//set camera stuff
 	$('#checkOutputTriggerCameraRecord').prop('checked', config.device.outputs.triggerCameraRecord.enabled);
-	$('#inputCameraSeconds').val(config.device.outputs.triggerCameraRecord.seconds);
-	$('#inputCameraMinutes').val(config.device.outputs.triggerCameraRecord.minutes);
 
 	$('#dropdownCameraLocation').text(config.device.outputs.triggerCameraRecord.camera);
-	$('#imputCameraServerIPLabel').val(config.device.outputs.triggerCameraRecord.serverIP);
+	$('#inputCameraServerIP').val(config.device.outputs.triggerCameraRecord.serverIP);
 
 	if (config.device.outputs.triggerCameraRecord.enabled) {
 		$('#dropdownCameraLocation').show();
-		$('#inputCameraSeconds').show();
-		$('#inputCameraSecondsLabel').show();
-		$('#inputCameraMinutes').show();
-		$('#inputCameraMinutesLabel').show();
-		$('#imputCameraServerIP').show();
-		$('#imputCameraServerIPLabel').show();
+		$('#dropdownCameraLocationLabel').show();
+		$('#inputCameraServerIP').show();
+		$('#inputCameraServerIPLabel').show();
+
+
+		//populate the camera field
+		$.get("http://" + config.device.outputs.triggerCameraRecord.serverIP + '/getESPData', (data) => {
+			var camera = data.locations;
+			$('#dropdownCameraLocation').empty();
+			for (var i = 0; i < camera.length; i++) {
+				$('#dropdownCameraLocation').append($('<option>', {
+					value: camera[i],
+					text: camera[i]
+				}));
+			}
+		});
+
 	}
 
 	if (config.device.outputs.triggerOtherBoard.enabled) {
@@ -555,10 +558,8 @@ function submitConfig() {
 				relay: $('#checkOutputRelay').prop('checked'), //not sure why you want to turn this off. Do we een add a option?
 				triggerCameraRecord: {
 					enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
-					serverIP: $('#imputCameraServerIPLabel').val(),
+					serverIP: $('#inputCameraServerIP').val(),
 					camera: $('#dropdownCameraLocation').text(),
-					seconds: parseInt($('#inputCameraSeconds').val()),
-					minutes: parseInt($('#inputCameraMinutes').val())
 				},
 				triggerOtherBoard: {
 					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),

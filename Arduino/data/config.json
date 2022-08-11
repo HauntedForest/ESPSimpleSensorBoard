@@ -29,9 +29,7 @@
 			"triggerCameraRecord": {
 				"enabled": false,
 				"serverIP": "",
-				"camera": "",
-				"seconds": 0,
-				"minutes": 0
+				"camera": ""
 			},
 			"triggerOtherBoard": {
 				"enabled": false,
