@@ -559,7 +559,7 @@ function submitConfig() {
 				triggerCameraRecord: {
 					enabled: $('#checkOutputTriggerCameraRecord').prop('checked'),
 					serverIP: $('#inputCameraServerIP').val(),
-					camera: $('#dropdownCameraLocation').text(),
+					camera: $('#dropdownCameraLocation').val(),
 				},
 				triggerOtherBoard: {
 					enabled: $('#checkOutputTriggerOtherBoard').prop('checked'),
