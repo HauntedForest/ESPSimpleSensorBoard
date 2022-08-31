@@ -5,6 +5,7 @@
 #include "AsyncHttpClient.h"
 #include "DYPlayerArduino.h"
 #include "AsyncJson.h"
+#include "ArtnetWifi.h"
 
 // OLED display width, in pixels
 #define SCREEN_WIDTH 128
@@ -31,24 +32,12 @@ String deviceName = "Default";
 bool deviceInputsMotionBlack = false;
 bool deviceInputsBeam = false;
 bool deviceInputsHTTP = true;
-bool deviceInputsTally = false;
-bool deviceTallyDisableSensor = false;
-bool deviceTallyTandomSensor = false;
 
 bool deviceInputsAlwaysOn = false;
 
 int deviceTimingsStartupMS = 0;
 int deviceTimingsCooldownMS = 0;
 int deviceTimingsLoopCount = 1;
-bool deviceOutputsRelayEnabled = true;
-bool deviceOutputsTriggerOtherBoardEnabled = false;
-String deviceOutputsTriggerOtherBoardIP = "";
-
-bool deviceOutputsTriggerCamera_enabled = false;
-String deviceOutputsTriggerCamera_serverIP = "";
-String deviceOutputsTriggerCamera_camera = "";
-int deviceOutputsTriggerCamera_min = 0;
-int deviceOutputsTriggerCamera_sec = 0;
 
 bool deviceOutputsPlayAudio_enabled = false;
 uint16_t deviceOutputsPlayAudio_ambient = -1;
@@ -56,14 +45,6 @@ uint16_t deviceOutputsPlayAudio_trigger = -1;
 uint16_t deviceOutputsPlayAudio_volumeAmbient = 15; // 0-30. 15 = 50%
 uint16_t deviceOutputsPlayAudio_volumeTrigger = 15; // 0-30. 15 = 50%
 uint16_t deviceOutputsPlayAudio_eq = (int)DY::Eq::Normal;
-
-const String TALLY_PROGRAM = "program";
-const String TALLY_PREVIEW = "preview";
-const String TALLY_NONE = "none";
-String currentTallyState = TALLY_NONE;
-
-bool temp_tally_program = false;
-bool temp_tally_preview = false;
 
 // Was AP request at start.
 bool startupRequestAP = false;
@@ -83,92 +64,16 @@ byte *sequenceArray = NULL;
 byte *sequenceFileName = NULL;
 int sequenceEventMS = 0;
 int sequenceVersionNumber = 0;
+short sequenceNumberOfRows = 0;
 short sequenceNumberOfColums = 0;
 const char *SEQUENCE_FILE_NAME_SPIFFS = "sequence.bin";
 
-void requestTally(AsyncWebServerRequest *request)
-{
-	// Serial.println("TALLY -> HIT!");
-	if (!deviceInputsTally)
-	{
-		request->send(405, "text/plain", "Tally not Enabled");
-		// Serial.println("TALLY -> Not enabled");
-		return;
-	}
-
-	if (!request->hasParam("bus"))
-	{
-		request->send(400, "text/plain", "Missing 'state' paramater");
-		// Serial.println("TALLY -> Missing state");
-		return;
-	}
-
-	if (!request->hasParam("on"))
-	{
-		request->send(400, "text/plain", "Missing 'on' paramater");
-		// Serial.println("TALLY -> Missing state");
-		return;
-	}
-
-	AsyncWebParameter *bus = request->getParam("bus");
-	AsyncWebParameter *onStr = request->getParam("on");
-	bool on = false;
-
-	if (onStr->value() == "true")
-	{
-		on = true;
-	}
-	else if (onStr->value() == "false")
-	{
-		on = false;
-	}
-	else
-	{
-		request->send(400, "text/plain", "Error: 'on' paramater must be 'true' or 'false'.");
-	}
-
-	if (bus->value() == TALLY_PROGRAM)
-	{
-		temp_tally_program = on;
-	}
-	else if (bus->value() == TALLY_PREVIEW)
-	{
-		temp_tally_preview = on;
-	}
-	else
-	{
-		request->send(400, "text/plain", "Error: 'state' paramater must be '" + TALLY_PREVIEW + "', '" + TALLY_PROGRAM + "'.");
-		// Serial.println("TALLY -> Error: 'state' paramater must be");
-		return;
-	}
-
-	// preview
-	if (!temp_tally_program && temp_tally_preview)
-	{
-		currentTallyState = TALLY_PREVIEW;
-	}
-	// program
-	else if (temp_tally_program && !temp_tally_preview)
-	{
-		currentTallyState = TALLY_PROGRAM;
-	}
-	// preview & program = program
-	else if (temp_tally_preview && temp_tally_program)
-	{
-		currentTallyState = TALLY_PROGRAM;
-	}
-	// Not in a state
-	else if (!temp_tally_preview && !temp_tally_program)
-	{
-		currentTallyState = TALLY_NONE;
-	}
-
-	// Serial.print("TALLY -> ");
-	// Serial.println(currentTallyState);
-
-	// Serial.println("TALLY -> Success");
-	request->send(200, "text/plain", "Success");
-}
+// artnet
+ArtnetWifi artnet;
+bool deviceOutputsArtnet_enabled = false;
+int deviceOutputsArtnet_universe = 0;
+int deviceOutputsArtnet_physical = 0;
+String deviceOutputsArtnet_ip = "192.168.1.255";
 
 void requestTrigger(AsyncWebServerRequest *request)
 {
@@ -180,14 +85,6 @@ void requestTrigger(AsyncWebServerRequest *request)
 		// Serial.println("E 1");
 		request->send(405, "text/plain", "HTTP requests not enabled");
 		// Serial.println("E 2");
-		return;
-	}
-	// Serial.println("2");
-	if (deviceInputsTally && currentTallyState != TALLY_PROGRAM)
-	{
-		// Serial.println("E 3");
-		request->send(405, "text/plain", "Tally is not live (change)");
-		// Serial.println("E 4");
 		return;
 	}
 	// Serial.println("3");
@@ -235,56 +132,61 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 {
 	sequenceVersionNumber = data[0];
 
-	// if (sequenceVersionNumber == 1)
-	// {
+	// Old unused version
+	/*
+	if (sequenceVersionNumber == 1)
+	{
 
-	// 	byte nameArrLength = data[1];
-	// 	sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
-	// 	memcpy(sequenceFileName, data + 2, nameArrLength);
-	// 	sequenceFileName[nameArrLength] = 0;
+		byte nameArrLength = data[1];
+		sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
+		memcpy(sequenceFileName, data + 2, nameArrLength);
+		sequenceFileName[nameArrLength] = 0;
 
-	// 	sequenceEventMS = data[2 + nameArrLength];
+		sequenceEventMS = data[2 + nameArrLength];
 
-	// 	short colLen = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
-	// 	byte rowLen = data[5 + nameArrLength];
+		short colLen = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
+		byte rowLen = data[5 + nameArrLength];
 
-	// 	if (sequenceArray != NULL)
-	// 	{
-	// 		free(sequenceArray);
-	// 		sequenceArray = NULL;
-	// 	}
+		if (sequenceArray != NULL)
+		{
+			free(sequenceArray);
+			sequenceArray = NULL;
+		}
 
-	// 	sequenceArray = (byte *)malloc(colLen * rowLen);
-	// 	memcpy(sequenceArray, data + (6 + nameArrLength), colLen * rowLen);
+		sequenceArray = (byte *)malloc(colLen * rowLen);
+		memcpy(sequenceArray, data + (6 + nameArrLength), colLen * rowLen);
 
-	// 	Serial.print("\nVersion Number: ");
-	// 	printHex(sequenceVersionNumber);
+		Serial.print("\nVersion Number: ");
+		printHex(sequenceVersionNumber);
 
-	// 	Serial.print("\nFile Name: ");
-	// 	Serial.print(String((const char *)sequenceFileName));
+		Serial.print("\nFile Name: ");
+		Serial.print(String((const char *)sequenceFileName));
 
-	// 	Serial.print("\nEvent MS: ");
-	// 	printHex(sequenceEventMS);
+		Serial.print("\nEvent MS: ");
+		printHex(sequenceEventMS);
 
-	// 	Serial.print("\nCol Length: ");
-	// 	printHex(colLen);
+		Serial.print("\nCol Length: ");
+		printHex(colLen);
 
-	// 	Serial.print("\nRow Length: ");
-	// 	printHex(rowLen);
+		Serial.print("\nRow Length: ");
+		printHex(rowLen);
 
-	// 	Serial.print("\nSequence:\n");
-	// 	for (uint8_t col = 0; col < colLen; col++)
-	// 	{
-	// 		for (uint8_t row = 0; row < rowLen; row++)
-	// 		{
-	// 			printHex(sequenceArray[row * colLen + col]);
-	// 		}
+		Serial.print("\nSequence:\n");
+		for (uint8_t col = 0; col < colLen; col++)
+		{
+			for (uint8_t row = 0; row < rowLen; row++)
+			{
+				printHex(sequenceArray[row * colLen + col]);
+			}
 
-	// 		Serial.println();
-	// 	}
-	// 	Serial.println();
-	// }
-	// else
+			Serial.println();
+		}
+		Serial.println();
+	}
+	else*/
+
+	// Relay version that we don't support
+	/*
 	if (sequenceVersionNumber == 2)
 	{
 
@@ -330,6 +232,58 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 		// }
 		Serial.println();
 	}
+
+	*/
+	if (sequenceVersionNumber == 3)
+	{
+		byte nameArrLength = data[1];
+		sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
+		memcpy(sequenceFileName, data + 2, nameArrLength);
+		sequenceFileName[nameArrLength] = 0;
+
+		sequenceEventMS = data[2 + nameArrLength];
+
+		sequenceNumberOfColums = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
+		sequenceNumberOfRows = (short)(((data[5 + nameArrLength] & 0xff) << 8) | ((data[6 + nameArrLength] & 0xff)));
+
+		if (sequenceArray != NULL)
+		{
+			free(sequenceArray);
+			sequenceArray = NULL;
+		}
+
+		const int numOfBytes = sequenceNumberOfColums * sequenceNumberOfRows;
+		sequenceArray = (byte *)malloc(numOfBytes);
+		memcpy(sequenceArray, data + (7 + nameArrLength), numOfBytes);
+
+		Serial.print("\nVersion Number: ");
+		printHex(sequenceVersionNumber);
+
+		Serial.print("\nFile Name: ");
+		Serial.print(String((const char *)sequenceFileName));
+
+		Serial.print("\nEvent MS: ");
+		printHex(sequenceEventMS);
+
+		Serial.print("\nRow Length: ");
+		printHex(sequenceNumberOfRows);
+
+		Serial.print("\nCol Length: ");
+		printHex(sequenceNumberOfColums);
+
+		// Serial.print("\nSequence:\n");
+		// for (uint8_t col = 0; col < sequenceNumberOfColums; col++)
+		// {
+		// 	for (uint8_t row = 0; row < sequenceNumberOfRows; row++)
+		// 	{
+		// 		printHex(sequenceArray[row * sequenceNumberOfColums + col]);
+		// 	}
+
+		// 	Serial.println();
+		// }
+		Serial.println();
+	}
+
 	else
 	{
 		Serial.print("Unknown sequence version number: ");
@@ -423,7 +377,6 @@ void setup()
 	// See https://github.com/me-no-dev/ESPAsyncWebServer
 	if (webServer)
 	{
-		webServer->on("/tally", HTTP_POST, requestTally);
 		webServer->on("/trigger", HTTP_POST, requestTrigger);
 		webServer->on("/trigger", HTTP_GET, requestTrigger);
 
@@ -440,6 +393,14 @@ void setup()
 	}
 
 	readSequenceFromSpiffs();
+
+	if (deviceOutputsArtnet_enabled)
+	{
+		artnet.begin(deviceOutputsArtnet_ip);
+		artnet.setUniverse(deviceOutputsArtnet_universe);
+		artnet.setPhysical(deviceOutputsArtnet_physical);
+		artnet.setLength(512);
+	}
 
 	// Uses normal Serial
 	// mp3.begin(9600);
@@ -516,69 +477,16 @@ void updateStatus(const connection_status_t &connectionStatus)
 		display.println(connectionStatus.ourLocalIP);
 	}
 
-	if (deviceInputsTally)
-	{
-		display.print("Tally: ");
-		display.println(currentTallyState);
-	}
+	// display.print("Seq: ");
+	// display.println(sequenceFileName);
 
 	if (connectionStatus.status == CONNSTAT_CONNECTED)
 	{
 		display.setCursor(114, 0);
 		display.println(connectionStatus.signalStrength - 1); // 99 cap to not waste a character
 	}
-	// if (!activate)
-	// {
-	// 	drawRelays(false, false, false, false, false);
-	// }
+
 	display.display();
-}
-
-// unused, this is too slow to actually draw them to the screen for reasons i don't fully understand.
-void drawRelays(bool clear, bool r1, bool r2, bool r3, bool r4)
-{
-	display.setCursor(100, 24); // line 4
-	if (clear)
-	{
-		display.fillRect(100, 24, 16, 4, SSD1306_BLACK);
-	}
-	if (r1)
-	{
-		display.fillRect(100, 24, 4, 4, SSD1306_WHITE);
-	}
-	else
-	{
-		display.drawRect(100, 24, 4, 4, SSD1306_WHITE);
-	}
-	if (r2)
-	{
-		display.fillRect(108, 24, 4, 4, SSD1306_WHITE);
-	}
-	else
-	{
-		display.drawRect(108, 24, 4, 4, SSD1306_WHITE);
-	}
-	if (r3)
-	{
-		display.fillRect(116, 24, 4, 4, SSD1306_WHITE);
-	}
-	else
-	{
-		display.drawRect(116, 24, 4, 4, SSD1306_WHITE);
-	}
-	if (r4)
-	{
-		display.fillRect(124, 24, 4, 4, SSD1306_WHITE);
-	}
-	else
-	{
-		display.drawRect(124, 24, 4, 4, SSD1306_WHITE);
-	}
-
-	if (clear)
-	{
-		display.display();
-	}
 }
 
 void saveState(const JsonObject &json)
@@ -587,30 +495,22 @@ void saveState(const JsonObject &json)
 	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
 	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
-	device["inputs"]["tally"]["enabled"] = deviceInputsTally;
-	device["inputs"]["tally"]["disableSensor"] = deviceTallyDisableSensor;
-	device["inputs"]["tally"]["tandomSensor"] = deviceTallyTandomSensor;
 	device["inputs"]["alwaysOn"] = deviceInputsAlwaysOn;
 
 	device["timings"]["startupMS"] = deviceTimingsStartupMS;
 	device["timings"]["cooldownMS"] = deviceTimingsCooldownMS;
 	device["timings"]["loopCount"] = deviceTimingsLoopCount;
-	device["outputs"]["relay"] = deviceOutputsRelayEnabled;
-	device["outputs"]["triggerOtherBoard"]["enabled"] = deviceOutputsTriggerOtherBoardEnabled;
-	device["outputs"]["triggerOtherBoard"]["ip"] = deviceOutputsTriggerOtherBoardIP;
 
-	device["outputs"]["triggerCameraRecord"]["enabled"] = deviceOutputsTriggerCamera_enabled;
-	device["outputs"]["triggerCameraRecord"]["serverIP"] = deviceOutputsTriggerCamera_serverIP;
-	device["outputs"]["triggerCameraRecord"]["camera"] = deviceOutputsTriggerCamera_camera;
-	device["outputs"]["triggerCameraRecord"]["seconds"] = deviceOutputsTriggerCamera_sec;
-	device["outputs"]["triggerCameraRecord"]["minutes"] = deviceOutputsTriggerCamera_min;
+	device["outputs"]["artnet"]["enabled"] = deviceOutputsArtnet_enabled;
+	device["outputs"]["artnet"]["universe"] = deviceOutputsArtnet_universe;
+	device["outputs"]["artnet"]["physical"] = deviceOutputsArtnet_physical;
+	device["outputs"]["artnet"]["ip"] = deviceOutputsArtnet_ip;
 
 	device["outputs"]["triggerAudio"]["enabled"] = deviceOutputsPlayAudio_enabled;
 	device["outputs"]["triggerAudio"]["ambient"] = deviceOutputsPlayAudio_ambient;
 	device["outputs"]["triggerAudio"]["trigger"] = deviceOutputsPlayAudio_trigger;
 	device["outputs"]["triggerAudio"]["volume"]["ambient"] = deviceOutputsPlayAudio_volumeAmbient;
 	device["outputs"]["triggerAudio"]["volume"]["trigger"] = deviceOutputsPlayAudio_volumeTrigger;
-
 	device["outputs"]["triggerAudio"]["eq"] = deviceOutputsPlayAudio_eq;
 
 	JsonObject admin = json.createNestedObject("admin");
@@ -634,23 +534,16 @@ void loadState(const JsonObject &json)
 			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as<bool>();
 			deviceInputsBeam = json["device"]["inputs"]["beam"].as<bool>();
 			deviceInputsHTTP = json["device"]["inputs"]["http"].as<bool>();
-			deviceInputsTally = json["device"]["inputs"]["tally"]["enabled"].as<bool>();
-			deviceTallyDisableSensor = json["device"]["inputs"]["tally"]["disableSensor"].as<bool>();
-			deviceTallyTandomSensor = json["device"]["inputs"]["tally"]["tandomSensor"].as<bool>();
 			deviceInputsAlwaysOn = json["device"]["inputs"]["alwaysOn"].as<bool>();
 		}
 
 		if (json["device"].containsKey("outputs"))
 		{
-			deviceOutputsRelayEnabled = json["device"]["outputs"]["relay"].as<bool>();
-			deviceOutputsTriggerOtherBoardEnabled = json["device"]["outputs"]["triggerOtherBoard"]["enabled"].as<bool>();
-			deviceOutputsTriggerOtherBoardIP = json["device"]["outputs"]["triggerOtherBoard"]["ip"].as<String>();
 
-			deviceOutputsTriggerCamera_enabled = json["device"]["outputs"]["triggerCameraRecord"]["enabled"].as<bool>();
-			deviceOutputsTriggerCamera_serverIP = json["device"]["outputs"]["triggerCameraRecord"]["serverIP"].as<String>();
-			deviceOutputsTriggerCamera_camera = json["device"]["outputs"]["triggerCameraRecord"]["camera"].as<String>();
-			deviceOutputsTriggerCamera_sec = json["device"]["outputs"]["triggerCameraRecord"]["seconds"].as<int>();
-			deviceOutputsTriggerCamera_min = json["device"]["outputs"]["triggerCameraRecord"]["minutes"].as<int>();
+			deviceOutputsArtnet_enabled = json["device"]["outputs"]["artnet"]["enabled"].as<bool>();
+			deviceOutputsArtnet_universe = json["device"]["outputs"]["artnet"]["universe"].as<int>();
+			deviceOutputsArtnet_physical = json["device"]["outputs"]["artnet"]["physical"].as<int>();
+			deviceOutputsArtnet_ip = json["device"]["outputs"]["artnet"]["ip"].as<String>();
 
 			deviceOutputsPlayAudio_enabled = json["device"]["outputs"]["triggerAudio"]["enabled"].as<bool>();
 			deviceOutputsPlayAudio_ambient = json["device"]["outputs"]["triggerAudio"]["ambient"].as<uint16_t>();
@@ -692,18 +585,14 @@ void loadState(const JsonObject &json)
 void checkForTrigger()
 {
 
-	// if tally is disabled, or its enabled in tandom mode
-	if (!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_PROGRAM))
+	if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW)
 	{
-		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW)
-		{
-			activate = true;
-		}
+		activate = true;
+	}
 
-		if (deviceInputsMotionBlack && digitalRead(PIR_BLACK_TRIGGER_PIN) == HIGH)
-		{
-			activate = true;
-		}
+	if (deviceInputsMotionBlack && digitalRead(PIR_BLACK_TRIGGER_PIN) == HIGH)
+	{
+		activate = true;
 	}
 
 	if (deviceInputsAlwaysOn)
@@ -715,21 +604,6 @@ void checkForTrigger()
 	{
 		activate = false;
 
-		// trigger camera record
-		if (deviceOutputsTriggerCamera_enabled)
-		{
-			String temp = "http://";
-			temp += deviceOutputsTriggerCamera_serverIP;
-			temp += "/trigger";
-			temp += "?location=" + deviceOutputsTriggerCamera_camera;
-			temp += "&minutes=" + deviceOutputsTriggerCamera_min;
-			temp += "&seconds=" + deviceOutputsTriggerCamera_sec;
-
-			// POST http://IP:PORT/trigger?location=var1&minutes=var2&seconds=var3
-			asyncHTTPClient.init("POST", temp.c_str());
-			asyncHTTPClient.send(true);
-		}
-
 		delay(deviceTimingsStartupMS);
 
 		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
@@ -740,34 +614,21 @@ void checkForTrigger()
 			mp3player.playSpecified(deviceOutputsPlayAudio_trigger);
 		}
 
-		if (deviceOutputsTriggerOtherBoardEnabled)
-		{
-			// POST http://IP:80/trigger
-			String temp = "http://";
-			temp += deviceOutputsTriggerOtherBoardIP;
-			temp += "/trigger";
-			asyncHTTPClient.init("POST", temp.c_str());
-			asyncHTTPClient.send(true);
-		}
-
 		for (int i = 0; i < deviceTimingsLoopCount; i++)
 		{
-			if (deviceOutputsRelayEnabled)
+			for (short col = 0; col < sequenceNumberOfColums; col++)
 			{
-				for (short col = 0; col < sequenceNumberOfColums; col++)
+				for (short row = 0; row < sequenceNumberOfRows; row++)
 				{
-					byte value = sequenceArray[col];
-					bool r1 = (value & 0x01) != 0;
-					bool r2 = (value & 0x02) != 0;
-					bool r3 = (value & 0x04) != 0;
-					bool r4 = (value & 0x08) != 0;
-					digitalWrite(RELAY_PIN_1, r1 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_2, r2 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_3, r3 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_4, r4 ? HIGH : LOW);
-					// drawRelays(true, r1, r2, r3, r4);
-					delay(sequenceEventMS);
+					byte value = sequenceArray[col * sequenceNumberOfRows + row];
+
+					if (deviceOutputsArtnet_enabled)
+					{
+						artnet.setByte(row, value);
+					}
 				}
+				artnet.write();
+				delay(sequenceEventMS);
 			}
 		}
 
@@ -786,6 +647,7 @@ void checkForTrigger()
 
 void loop()
 {
+
 	// put your main code here, to run repeatedly:
 	framework_loop();
 

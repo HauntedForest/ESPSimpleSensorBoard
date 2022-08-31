@@ -1,8 +1,8 @@
 {
 	"network": {
 		"useWifi": true,
-		"ssid": "HFShow",
-		"passphrase": "Husky3087",
+		"ssid": "Art-Net",
+		"passphrase": "ostrich!",
 		"hostname": "ESP",
 		"ip": [ 192, 168, 1, 100 ],
 		"netmask": [ 255, 255, 0, 0 ],
@@ -16,25 +16,14 @@
 			"motionBlack": false,
 			"beam": true,
 			"http": true,
-			"tally": {
-				"enabled": false,
-				"disableSensor": true,
-				"tandomSensor": false
-			},
 			"alwaysOn": false
 		},
 		"outputs": {
-			"relay": true,
-			"triggerCameraRecord": {
-				"enabled": false,
-				"serverIP": "",
-				"camera": "",
-				"seconds": 0,
-				"minutes": 0
-			},
-			"triggerOtherBoard": {
-				"enabled": false,
-				"ip": ""
+			"artnet": {
+				"enabled": true,
+				"universe": 0,
+				"physical": 0,
+				"ip": "192.168.1.255"
 			},
 			"triggerAudio": {
 				"enabled": false,
@@ -55,6 +44,6 @@
 	},
 
 	"admin": {
-		"id": "New v1.2"
+		"id": "Artnet"
 	}
 }
