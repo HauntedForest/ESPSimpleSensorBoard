@@ -13,8 +13,7 @@
 
 	"device": {
 		"inputs": {
-			"motionBlack": false,
-			"beam": true,
+			"motionBlack": true,
 			"http": true,
 			"tally": {
 				"enabled": false,
@@ -55,6 +54,6 @@
 	},
 
 	"admin": {
-		"id": "New v1.2"
+		"id": "DMX 1.2"
 	}
 }

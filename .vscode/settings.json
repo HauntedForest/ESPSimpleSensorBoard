@@ -1,3 +1,6 @@
 {
-    "esp8266fs.logLevel": "debug"
+    "esp8266fs.logLevel": "debug",
+    "files.associations": {
+        "cstddef": "cpp"
+    }
 }

@@ -72,7 +72,6 @@ window.addEventListener('eg-config-load', e => {
     console.log('Device: Config Load', config);
 
     $('#checkInputMotionBlack').prop('checked', config.device.inputs.motionBlack);
-    $('#checkInputBeam').prop('checked', config.device.inputs.beam);
     $('#checkInputHTTPRequests').prop('checked', config.device.inputs.http);
     $('#checkInputTally').prop('checked', config.device.inputs.tally.enabled);
     $('#checkInputAlwaysOn').prop('checked', config.device.inputs.alwaysOn);
@@ -131,7 +130,6 @@ window.addEventListener('eg-config-save', e => {
     var config = {
         inputs: {
             motionBlack: $('#checkInputMotionBlack').prop('checked'),
-            beam: $('#checkInputBeam').prop('checked'),
             http: $('#checkInputHTTPRequests').prop('checked'),
             tally: {
                 enabled: $('#checkInputTally').prop('checked'),

@@ -5,6 +5,7 @@
 #include "AsyncHttpClient.h"
 #include "DYPlayerArduino.h"
 #include "AsyncJson.h"
+#include "ESPDMX.h"
 
 // OLED display width, in pixels
 #define SCREEN_WIDTH 128
@@ -17,19 +18,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 const int forceAccessPointPin = D5; // Connect to ground to force access point.
 #define RELAY_PIN_1 D1
-#define RELAY_PIN_2 D6
-#define RELAY_PIN_3 D7
 #define RELAY_PIN_4 D8
 
-// beam sensor
-#define BEAM_TRIGGER_PIN D4
 // 3 pin PIR with board modification
 #define PIR_BLACK_TRIGGER_PIN D0
 
 String deviceName = "Default";
 
 bool deviceInputsMotionBlack = false;
-bool deviceInputsBeam = false;
 bool deviceInputsHTTP = true;
 bool deviceInputsTally = false;
 bool deviceTallyDisableSensor = false;
@@ -83,8 +79,13 @@ byte *sequenceArray = NULL;
 byte *sequenceFileName = NULL;
 int sequenceEventMS = 0;
 int sequenceVersionNumber = 0;
+short sequenceNumberOfRows = 0;
 short sequenceNumberOfColums = 0;
 const char *SEQUENCE_FILE_NAME_SPIFFS = "sequence.bin";
+
+// dmx
+DMXESPSerial dmx;
+long lastTimeIUpdatedDMX = 0; // when did we last update the dmx. It should be updated every 25ms
 
 void requestTally(AsyncWebServerRequest *request)
 {
@@ -285,6 +286,7 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 	// 	Serial.println();
 	// }
 	// else
+	/*
 	if (sequenceVersionNumber == 2)
 	{
 
@@ -322,6 +324,56 @@ void parseAndStoreInRamSequenceBinaryFile(uint8_t *data, size_t len)
 		// for (uint8_t col = 0; col < sequenceNumberOfColums; col++)
 		// {
 		// 	for (uint8_t row = 0; row < rowLen; row++)
+		// 	{
+		// 		printHex(sequenceArray[row * sequenceNumberOfColums + col]);
+		// 	}
+
+		// 	Serial.println();
+		// }
+		Serial.println();
+	}
+	else */
+	if (sequenceVersionNumber == 3)
+	{
+		byte nameArrLength = data[1];
+		sequenceFileName = (byte *)malloc(nameArrLength + 1); // 0 byte ending because C
+		memcpy(sequenceFileName, data + 2, nameArrLength);
+		sequenceFileName[nameArrLength] = 0;
+
+		sequenceEventMS = data[2 + nameArrLength];
+
+		sequenceNumberOfColums = (short)(((data[3 + nameArrLength] & 0xff) << 8) | ((data[4 + nameArrLength] & 0xff)));
+		sequenceNumberOfRows = (short)(((data[5 + nameArrLength] & 0xff) << 8) | ((data[6 + nameArrLength] & 0xff)));
+
+		if (sequenceArray != NULL)
+		{
+			free(sequenceArray);
+			sequenceArray = NULL;
+		}
+
+		const int numOfBytes = sequenceNumberOfColums * sequenceNumberOfRows;
+		sequenceArray = (byte *)malloc(numOfBytes);
+		memcpy(sequenceArray, data + (7 + nameArrLength), numOfBytes);
+
+		Serial.print("\nVersion Number: ");
+		printHex(sequenceVersionNumber);
+
+		Serial.print("\nFile Name: ");
+		Serial.print(String((const char *)sequenceFileName));
+
+		Serial.print("\nEvent MS: ");
+		printHex(sequenceEventMS);
+
+		Serial.print("\nRow Length: ");
+		printHex(sequenceNumberOfRows);
+
+		Serial.print("\nCol Length: ");
+		printHex(sequenceNumberOfColums);
+
+		// Serial.print("\nSequence:\n");
+		// for (uint8_t col = 0; col < sequenceNumberOfColums; col++)
+		// {
+		// 	for (uint8_t row = 0; row < sequenceNumberOfRows; row++)
 		// 	{
 		// 		printHex(sequenceArray[row * sequenceNumberOfColums + col]);
 		// 	}
@@ -386,17 +438,10 @@ void setup()
 	pinMode(RELAY_PIN_1, OUTPUT);
 	digitalWrite(RELAY_PIN_1, LOW);
 
-	pinMode(RELAY_PIN_2, OUTPUT);
-	digitalWrite(RELAY_PIN_2, LOW);
-
-	pinMode(RELAY_PIN_3, OUTPUT);
-	digitalWrite(RELAY_PIN_3, LOW);
-
 	pinMode(RELAY_PIN_4, OUTPUT);
 	digitalWrite(RELAY_PIN_4, LOW);
 
 	pinMode(PIR_BLACK_TRIGGER_PIN, INPUT);
-	pinMode(BEAM_TRIGGER_PIN, INPUT_PULLUP);
 
 	// Initialise OLED display.
 	Wire.begin(4, 0);						   // set I2C pins [SDA = GPIO4 (D2), SCL = GPIO0 (D3)], default clock is 100kHz
@@ -438,6 +483,9 @@ void setup()
 		AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/test/sound", requestTestSound);
 		webServer->addHandler(handler);
 	}
+
+	// init dmx
+	dmx.init(512);
 
 	readSequenceFromSpiffs();
 
@@ -585,7 +633,6 @@ void saveState(const JsonObject &json)
 {
 	JsonObject device = json.createNestedObject("device");
 	device["inputs"]["motionBlack"] = deviceInputsMotionBlack;
-	device["inputs"]["beam"] = deviceInputsBeam;
 	device["inputs"]["http"] = deviceInputsHTTP;
 	device["inputs"]["tally"]["enabled"] = deviceInputsTally;
 	device["inputs"]["tally"]["disableSensor"] = deviceTallyDisableSensor;
@@ -632,7 +679,6 @@ void loadState(const JsonObject &json)
 		if (json["device"].containsKey("inputs"))
 		{
 			deviceInputsMotionBlack = json["device"]["inputs"]["motionBlack"].as<bool>();
-			deviceInputsBeam = json["device"]["inputs"]["beam"].as<bool>();
 			deviceInputsHTTP = json["device"]["inputs"]["http"].as<bool>();
 			deviceInputsTally = json["device"]["inputs"]["tally"]["enabled"].as<bool>();
 			deviceTallyDisableSensor = json["device"]["inputs"]["tally"]["disableSensor"].as<bool>();
@@ -695,11 +741,6 @@ void checkForTrigger()
 	// if tally is disabled, or its enabled in tandom mode
 	if (!deviceInputsTally || (deviceInputsTally && deviceTallyTandomSensor && currentTallyState == TALLY_PROGRAM))
 	{
-		if (deviceInputsBeam && digitalRead(BEAM_TRIGGER_PIN) == LOW)
-		{
-			activate = true;
-		}
-
 		if (deviceInputsMotionBlack && digitalRead(PIR_BLACK_TRIGGER_PIN) == HIGH)
 		{
 			activate = true;
@@ -752,22 +793,30 @@ void checkForTrigger()
 
 		for (int i = 0; i < deviceTimingsLoopCount; i++)
 		{
-			if (deviceOutputsRelayEnabled)
+			for (short col = 0; col < sequenceNumberOfColums; col++)
 			{
-				for (short col = 0; col < sequenceNumberOfColums; col++)
+				for (short row = 0; row < sequenceNumberOfRows; row++)
 				{
-					byte value = sequenceArray[col];
-					bool r1 = (value & 0x01) != 0;
-					bool r2 = (value & 0x02) != 0;
-					bool r3 = (value & 0x04) != 0;
-					bool r4 = (value & 0x08) != 0;
-					digitalWrite(RELAY_PIN_1, r1 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_2, r2 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_3, r3 ? HIGH : LOW);
-					digitalWrite(RELAY_PIN_4, r4 ? HIGH : LOW);
-					// drawRelays(true, r1, r2, r3, r4);
-					delay(sequenceEventMS);
+					byte value = sequenceArray[col * sequenceNumberOfRows + row];
+					if (row == 0)
+					{
+						bool bVal = value > 127;
+						digitalWrite(RELAY_PIN_1, bVal ? HIGH : LOW);
+					}
+					else if (row == 1)
+					{
+						bool bVal = value > 127;
+						digitalWrite(RELAY_PIN_4, bVal ? HIGH : LOW);
+					}
+					else
+					{
+						dmx.write(row - 1, value);
+					}
 				}
+
+				dmx.update();
+				lastTimeIUpdatedDMX = millis();
+				delay(sequenceEventMS);
 			}
 		}
 
@@ -788,6 +837,13 @@ void loop()
 {
 	// put your main code here, to run repeatedly:
 	framework_loop();
+
+	// always update dmx every 25ms
+	if (millis() - lastTimeIUpdatedDMX > 25)
+	{
+		dmx.update();
+		lastTimeIUpdatedDMX = millis();
+	}
 
 	checkForTrigger();
 
