@@ -2,3 +2,5 @@
 Arduino/tmp/
 
 CanvasIdea/
+
+.build/
