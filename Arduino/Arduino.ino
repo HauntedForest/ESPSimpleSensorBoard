@@ -87,6 +87,26 @@ const char *SEQUENCE_FILE_NAME_SPIFFS = "sequence.bin";
 DMXESPSerial dmx;
 long lastTimeIUpdatedDMX = 0; // when did we last update the dmx. It should be updated every 25ms
 
+void tryUpdateDMX()
+{
+	// always update dmx every 25ms
+	if (millis() - lastTimeIUpdatedDMX > 25)
+	{
+		dmx.update();
+		lastTimeIUpdatedDMX = millis();
+	}
+}
+
+void delayAndUpdateDMX(int ms)
+{
+	long time = millis();
+	while (millis() - time < ms)
+	{
+		tryUpdateDMX();
+		delay(1);
+	}
+}
+
 void requestTally(AsyncWebServerRequest *request)
 {
 	// Serial.println("TALLY -> HIT!");
@@ -838,12 +858,7 @@ void loop()
 	// put your main code here, to run repeatedly:
 	framework_loop();
 
-	// always update dmx every 25ms
-	if (millis() - lastTimeIUpdatedDMX > 25)
-	{
-		dmx.update();
-		lastTimeIUpdatedDMX = millis();
-	}
+	tryUpdateDMX();
 
 	checkForTrigger();
 
