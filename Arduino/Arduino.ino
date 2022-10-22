@@ -237,7 +237,7 @@ void requestTestSound(AsyncWebServerRequest *request, JsonVariant &jsonRaw)
 	// go back to ambient if needed
 	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 	{
-		delay(1000);
+		delayAndUpdateDMX(1000);
 		// mp3.playSL(deviceOutputsPlayAudio_ambient);
 		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
 		mp3player.playSpecified(deviceOutputsPlayAudio_ambient);
@@ -512,14 +512,14 @@ void setup()
 	// Uses normal Serial
 	// mp3.begin(9600);
 	Serial.end();
-	delay(300);
+	delayAndUpdateDMX(300);
 	mp3player.begin();
-	delay(800);
+	delayAndUpdateDMX(800);
 
 	// Serial.begin(9600);
 
 	//  mp3.sendCommand(CMD_SEL_DEV, 0, 2); // select sd-card
-	delay(800); // wait for chip to select the SD card
+	delayAndUpdateDMX(800); // wait for chip to select the SD card
 
 	// mp3.play(SOUND_FINISH_BOOTING);
 	mp3player.setEq(static_cast<DY::Eq>(deviceOutputsPlayAudio_eq));
@@ -530,7 +530,7 @@ void setup()
 
 	if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 	{
-		delay(1000);
+		delayAndUpdateDMX(1000);
 		// mp3.playSL(deviceOutputsPlayAudio_ambient);
 		mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
 		mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
@@ -791,7 +791,7 @@ void checkForTrigger()
 			asyncHTTPClient.send(true);
 		}
 
-		delay(deviceTimingsStartupMS);
+		delayAndUpdateDMX(deviceTimingsStartupMS);
 
 		if (deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_trigger > 0)
 		{
@@ -836,15 +836,15 @@ void checkForTrigger()
 
 				dmx.update();
 				lastTimeIUpdatedDMX = millis();
-				delay(sequenceEventMS);
+				delayAndUpdateDMX(sequenceEventMS);
 			}
 		}
 
-		delay(deviceTimingsCooldownMS);
+		delayAndUpdateDMX(deviceTimingsCooldownMS);
 
 		if (!deviceInputsAlwaysOn && deviceOutputsPlayAudio_enabled && deviceOutputsPlayAudio_ambient > 0)
 		{
-			delay(1020);
+			delayAndUpdateDMX(1020);
 			// mp3.playSL(deviceOutputsPlayAudio_ambient);
 			mp3player.setVolume(deviceOutputsPlayAudio_volumeAmbient);
 			mp3player.setCycleMode(DY::PlayMode::RepeatOne); // repeat current song over and over
